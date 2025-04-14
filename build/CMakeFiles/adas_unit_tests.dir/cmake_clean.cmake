@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_BV.cpp.obj"
-  "CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_BV.cpp.obj.d"
+  "CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_EQ.cpp.obj"
+  "CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_EQ.cpp.obj.d"
   "adas_unit_tests.exe"
   "adas_unit_tests.exe.manifest"
   "adas_unit_tests.pdb"

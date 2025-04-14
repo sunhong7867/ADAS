@@ -113,7 +113,7 @@ TEST_F(EgoVehicleEstimationTest_BV, TC_EGO_BV_06) {
     EXPECT_NEAR(kfState.X[2], 1.0f, 0.1f);
 }
 
- //─────────────────────────────────────────────
+//─────────────────────────────────────────────
 // TC_EGO_BV_07 ~ TC_EGO_BV_09 : IMU accel_y 스파이크 경계
 //─────────────────────────────────────────────
 TEST_F(EgoVehicleEstimationTest_BV, TC_EGO_BV_07) {

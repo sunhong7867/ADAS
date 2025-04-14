@@ -24,7 +24,7 @@
 #define R_GPS           0.1f    /* 관측 노이즈 (대각 성분) */
 
 /* 2x2 행렬의 역행렬 계산 (2x2 matrix inversion) */
-static bool Invert2x2(const float S[4], float S_inv[4])
+bool Invert2x2(const float S[4], float S_inv[4])
 {
     float det = S[0] * S[3] - S[1] * S[2];
     if(fabsf(det) < 1e-6) return false;
@@ -37,7 +37,7 @@ static bool Invert2x2(const float S[4], float S_inv[4])
 }
 
 /* 스파이크(노이즈) 감지 함수 */
-static bool CheckSpike(float newVal, float oldVal, float threshold)
+bool CheckSpike(float newVal, float oldVal, float threshold)
 {
     float diff = newVal - oldVal;
     return (fabsf(diff) > threshold);

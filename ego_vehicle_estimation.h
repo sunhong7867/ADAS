@@ -56,6 +56,9 @@ void EgoVehicleEstimation(
     EgoVehicleKFState_t  *pState
 );
 
+bool Invert2x2(const float S[4], float S_inv[4]);
+bool CheckSpike(float newVal, float oldVal, float threshold);
+
 #ifdef __cplusplus
 }
 #endif

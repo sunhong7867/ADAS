@@ -7,9 +7,9 @@
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\adas_unit_tests.dir\\ego_vehicle_estimation_test_EQ.cpp.obj -c C:\\Projects\\GoogleTestProject\\ego_vehicle_estimation_test_EQ.cpp",
-  "file": "C:/Projects/GoogleTestProject/ego_vehicle_estimation_test_EQ.cpp",
-  "output": "CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_EQ.cpp.obj"
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\adas_unit_tests.dir\\ego_vehicle_estimation_test_RA.cpp.obj -c C:\\Projects\\GoogleTestProject\\ego_vehicle_estimation_test_RA.cpp",
+  "file": "C:/Projects/GoogleTestProject/ego_vehicle_estimation_test_RA.cpp",
+  "output": "CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_RA.cpp.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build/googletest/googlemock",

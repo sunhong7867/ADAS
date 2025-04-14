@@ -229,7 +229,7 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_08)
     // 내부적으로 delta_t=0.1s 계산 후 예측에 반영
     // 직접 확인은 어렵지만, 보정 전후 Heading이나 속도 변화를 근사로 확인
     // 여기서는 예제상 어느 정도 변화만 있는지 확인
-    EXPECT_FLOAT_RA(kfState.Previous_Update_Time, 1100.0f); // 업데이트 후 저장
+    EXPECT_FLOAT_EQ(kfState.Previous_Update_Time, 1100.0f); // 업데이트 후 저장
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -247,7 +247,7 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_09)
 
     // 내부적으로 delta_t가 0보다 작으면 0.01로 적용
     // 이후 Previous_Update_Time은 900으로 변경
-    EXPECT_FLOAT_RA(kfState.Previous_Update_Time, 900.0f);
+    EXPECT_FLOAT_EQ(kfState.Previous_Update_Time, 900.0f);
     // 속도나 Heading이 소폭 변화했는지 정도로만 체크
     EXPECT_NEAR(egoData.Ego_Heading, 0.0f, 3.0f); 
 }
@@ -681,7 +681,7 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_32)
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_FLOAT_RA(egoData.Ego_Velocity_X, 8.8f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Velocity_X, 8.8f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -694,7 +694,7 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_33)
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_FLOAT_RA(egoData.Ego_Velocity_Y, 2.2f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Velocity_Y, 2.2f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -707,7 +707,7 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_34)
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_FLOAT_RA(egoData.Ego_Acceleration_X, 0.7f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Acceleration_X, 0.7f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -720,7 +720,7 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_35)
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_FLOAT_RA(egoData.Ego_Acceleration_Y, -1.1f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Acceleration_Y, -1.1f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -733,7 +733,7 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_36)
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_FLOAT_RA(egoData.Ego_Heading, 30.0f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Heading, 30.0f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -960,11 +960,11 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_47)
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_FLOAT_RA(egoData.Ego_Velocity_X, 10.0f);
-    EXPECT_FLOAT_RA(egoData.Ego_Velocity_Y, 1.0f);
-    EXPECT_FLOAT_RA(egoData.Ego_Acceleration_X, 2.0f);
-    EXPECT_FLOAT_RA(egoData.Ego_Acceleration_Y, 1.0f);
-    EXPECT_FLOAT_RA(egoData.Ego_Heading, 45.0f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Velocity_X, 10.0f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Velocity_Y, 1.0f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Acceleration_X, 2.0f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Acceleration_Y, 1.0f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Heading, 45.0f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -979,8 +979,8 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_48)
     kfState.X[4] = 10.0f; // Heading
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_FLOAT_RA(egoData.Ego_Velocity_X, 8.0f);
-    EXPECT_FLOAT_RA(egoData.Ego_Heading, 10.0f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Velocity_X, 8.0f);
+    EXPECT_FLOAT_EQ(egoData.Ego_Heading, 10.0f);
     // 구조체에 Ego_Position, Accel 등 있음 → 문제 없이 참조
 }
 

@@ -1,0 +1,5 @@
+if(EXISTS "C:/Projects/GoogleTestProject/build/adas_unit_tests[1]_tests.cmake")
+  include("C:/Projects/GoogleTestProject/build/adas_unit_tests[1]_tests.cmake")
+else()
+  add_test(adas_unit_tests_NOT_BUILT adas_unit_tests_NOT_BUILT)
+endif()

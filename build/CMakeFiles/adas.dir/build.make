@@ -71,28 +71,28 @@ include CMakeFiles/adas.dir/flags.make
 CMakeFiles/adas.dir/codegen:
 .PHONY : CMakeFiles/adas.dir/codegen
 
-CMakeFiles/adas.dir/lane_selection.c.obj: CMakeFiles/adas.dir/flags.make
-CMakeFiles/adas.dir/lane_selection.c.obj: C:/Projects/GoogleTestProject/lane_selection.c
-CMakeFiles/adas.dir/lane_selection.c.obj: CMakeFiles/adas.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Projects\GoogleTestProject\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/adas.dir/lane_selection.c.obj"
-	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/adas.dir/lane_selection.c.obj -MF CMakeFiles\adas.dir\lane_selection.c.obj.d -o CMakeFiles\adas.dir\lane_selection.c.obj -c C:\Projects\GoogleTestProject\lane_selection.c
+CMakeFiles/adas.dir/target_selection.c.obj: CMakeFiles/adas.dir/flags.make
+CMakeFiles/adas.dir/target_selection.c.obj: C:/Projects/GoogleTestProject/target_selection.c
+CMakeFiles/adas.dir/target_selection.c.obj: CMakeFiles/adas.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Projects\GoogleTestProject\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/adas.dir/target_selection.c.obj"
+	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/adas.dir/target_selection.c.obj -MF CMakeFiles\adas.dir\target_selection.c.obj.d -o CMakeFiles\adas.dir\target_selection.c.obj -c C:\Projects\GoogleTestProject\target_selection.c
 
-CMakeFiles/adas.dir/lane_selection.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/adas.dir/lane_selection.c.i"
-	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Projects\GoogleTestProject\lane_selection.c > CMakeFiles\adas.dir\lane_selection.c.i
+CMakeFiles/adas.dir/target_selection.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/adas.dir/target_selection.c.i"
+	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Projects\GoogleTestProject\target_selection.c > CMakeFiles\adas.dir\target_selection.c.i
 
-CMakeFiles/adas.dir/lane_selection.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/adas.dir/lane_selection.c.s"
-	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Projects\GoogleTestProject\lane_selection.c -o CMakeFiles\adas.dir\lane_selection.c.s
+CMakeFiles/adas.dir/target_selection.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/adas.dir/target_selection.c.s"
+	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Projects\GoogleTestProject\target_selection.c -o CMakeFiles\adas.dir\target_selection.c.s
 
 # Object files for target adas
 adas_OBJECTS = \
-"CMakeFiles/adas.dir/lane_selection.c.obj"
+"CMakeFiles/adas.dir/target_selection.c.obj"
 
 # External object files for target adas
 adas_EXTERNAL_OBJECTS =
 
-libadas.a: CMakeFiles/adas.dir/lane_selection.c.obj
+libadas.a: CMakeFiles/adas.dir/target_selection.c.obj
 libadas.a: CMakeFiles/adas.dir/build.make
 libadas.a: CMakeFiles/adas.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Projects\GoogleTestProject\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C static library libadas.a"

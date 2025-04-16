@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Projects/GoogleTestProject/lane_selection.c" "CMakeFiles/adas.dir/lane_selection.c.obj" "gcc" "CMakeFiles/adas.dir/lane_selection.c.obj.d"
+  "C:/Projects/GoogleTestProject/target_selection.c" "CMakeFiles/adas.dir/target_selection.c.obj" "gcc" "CMakeFiles/adas.dir/target_selection.c.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

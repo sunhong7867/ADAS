@@ -133,8 +133,8 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_03)
 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float exX=10.0f + 1.0f*3.0f=13.0f;
-    float exY=20.0f + 1.5f*3.0f=24.5f;
+    float exX = 10.0f + 1.0f * 3.0f;    // 10+3=13
+    float exY = 20.0f + 1.5f * 3.0f;    // 20+4.5=24.5
     EXPECT_NEAR(predList[0].Predicted_Position_X, exX,1e-3);
     EXPECT_NEAR(predList[0].Predicted_Position_Y, exY,1e-3);
 }
@@ -168,7 +168,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_05)
 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float exX=100.0f+8.0f*3.0f=124.0f;
+    float exX = 100.0f + 8.0f * 3.0f;   // 100+24=124
     EXPECT_NEAR(predList[0].Predicted_Position_X, exX,1e-3);
 }
 
@@ -210,7 +210,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_08)
 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float exX= 0+5*3=15;
+    float exX= 0 + 5 * 3; // 15
     EXPECT_NEAR(predList[0].Predicted_Position_X,15,1e-3);
     EXPECT_NEAR(predList[0].Predicted_Position_Y,100.0f,1e-6);
 }
@@ -226,7 +226,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_09)
 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float exY=0+4*3=12;
+    float exY = 0 + 4 * 3;  // 12
     EXPECT_NEAR(predList[0].Predicted_Position_Y,12,1e-3);
     EXPECT_NEAR(predList[0].Predicted_Position_X,10,1e-6);
 }
@@ -242,7 +242,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_10)
 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=0+10*3+0.5f*(-2)*9=30-9=21;
+    float ex = 0 + 10 * 3 + 0.5f * (-2) * 9; // 30 - 9=21
     EXPECT_NEAR(predList[0].Predicted_Position_X,21,1.0f); // 허용오차 1.0f
 }
 
@@ -256,7 +256,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_11)
 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float exY=20.0f + (-5.0f)*3=5.0f;
+    float exY = 20.0f + (-5.0f) * 3; // 20-15=5
     EXPECT_NEAR(predList[0].Predicted_Position_Y, exY,1e-3);
 }
 
@@ -269,7 +269,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_12)
 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float exX=100+(-5)*3=85;
+    float exX=100+(-5)*3; // 100-15=85
     EXPECT_NEAR(predList[0].Predicted_Position_X, exX,1e-3);
 }
 
@@ -314,7 +314,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_16)
     filteredList[0].Filtered_Accel_X=2.0f;
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=0+0*3+0.5f*2*9=9.0f;
+    float ex=0+0*3+0.5f*2*9; // 0+0+9=9
     EXPECT_NEAR(predList[0].Predicted_Position_X, ex,1e-3);
 }
 
@@ -326,7 +326,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_17)
     filteredList[0].Filtered_Velocity_X=100.0f; // 100m/s
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=100*3=300.0f;
+    float ex=100*3; // 300m
     EXPECT_GE(predList[0].Predicted_Distance,300.0f);
 }
 
@@ -512,7 +512,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_15)
     filteredList[0].Filtered_Position_X=0.0f; 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=2*3=6; 
+    float ex=2*3; // 6.0f
     EXPECT_NEAR(predList[0].Predicted_Position_X,6,1e-3);
 }
 
@@ -525,7 +525,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_16)
     filteredList[0].Filtered_Position_X=10.0f;
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=10+0*3+0.5f*(-1)*9=10-4.5=5.5f;
+    float ex=10+0*3+0.5f*(-1)*9; // 10-4.5=5.5
     EXPECT_NEAR(predList[0].Predicted_Position_X,5.5f,1e-3);
 }
 
@@ -579,7 +579,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_RA_01)
     filteredList[0].Filtered_Velocity_X=30.0f;
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=0+30*3=90;
+    float ex=0+30*3;
     EXPECT_NEAR(predList[0].Predicted_Position_X, ex,2.0f);
 }
 
@@ -591,7 +591,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_RA_02)
     filteredList[0].Filtered_Accel_X=-2.0f;
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=0+0*3+0.5f*(-2)*9=-9;
+    float ex=0+0*3+0.5f*(-2)*9;
     EXPECT_NEAR(predList[0].Predicted_Position_X, ex,1.0f);
 }
 
@@ -628,7 +628,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_RA_05)
 
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=50+10*3=80;
+    float ex=50+10*3;
     EXPECT_NEAR(predList[0].Predicted_Position_X,ex,1e-3);
 }
 
@@ -652,7 +652,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_RA_07)
     filteredList[0].Filtered_Accel_X=2.0f;
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=0+10*3+0.5f*2*9=30+9=39;
+    float ex=0+10*3+0.5f*2*9;
     EXPECT_NEAR(predList[0].Predicted_Position_X,39,1e-3);
 }
 
@@ -779,7 +779,7 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_RA_19)
     filteredList[0].Filtered_Velocity_X=2;
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
-    float ex=0+2*3=6;
+    float ex=0+2*3;
     EXPECT_NEAR(predList[0].Predicted_Position_X,6,1e-3);
 }
 

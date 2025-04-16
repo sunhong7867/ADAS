@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-lane_selection.obj: lane_selection.c.obj
-.PHONY : lane_selection.obj
+target_selection.obj: target_selection.c.obj
+.PHONY : target_selection.obj
 
 # target to build an object file
-lane_selection.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lane_selection.c.obj
-.PHONY : lane_selection.c.obj
+target_selection.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.obj
+.PHONY : target_selection.c.obj
 
-lane_selection.i: lane_selection.c.i
-.PHONY : lane_selection.i
+target_selection.i: target_selection.c.i
+.PHONY : target_selection.i
 
 # target to preprocess a source file
-lane_selection.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lane_selection.c.i
-.PHONY : lane_selection.c.i
+target_selection.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.i
+.PHONY : target_selection.c.i
 
-lane_selection.s: lane_selection.c.s
-.PHONY : lane_selection.s
+target_selection.s: target_selection.c.s
+.PHONY : target_selection.s
 
 # target to generate assembly for a file
-lane_selection.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lane_selection.c.s
-.PHONY : lane_selection.c.s
+target_selection.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.s
+.PHONY : target_selection.c.s
 
-target_selection_test_FP.obj: target_selection_test_FP.cpp.obj
-.PHONY : target_selection_test_FP.obj
+target_selection_test_ST.obj: target_selection_test_ST.cpp.obj
+.PHONY : target_selection_test_ST.obj
 
 # target to build an object file
-target_selection_test_FP.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_FP.cpp.obj
-.PHONY : target_selection_test_FP.cpp.obj
+target_selection_test_ST.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.obj
+.PHONY : target_selection_test_ST.cpp.obj
 
-target_selection_test_FP.i: target_selection_test_FP.cpp.i
-.PHONY : target_selection_test_FP.i
+target_selection_test_ST.i: target_selection_test_ST.cpp.i
+.PHONY : target_selection_test_ST.i
 
 # target to preprocess a source file
-target_selection_test_FP.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_FP.cpp.i
-.PHONY : target_selection_test_FP.cpp.i
+target_selection_test_ST.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.i
+.PHONY : target_selection_test_ST.cpp.i
 
-target_selection_test_FP.s: target_selection_test_FP.cpp.s
-.PHONY : target_selection_test_FP.s
+target_selection_test_ST.s: target_selection_test_ST.cpp.s
+.PHONY : target_selection_test_ST.s
 
 # target to generate assembly for a file
-target_selection_test_FP.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_FP.cpp.s
-.PHONY : target_selection_test_FP.cpp.s
+target_selection_test_ST.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.s
+.PHONY : target_selection_test_ST.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... lane_selection.obj
-	@echo ... lane_selection.i
-	@echo ... lane_selection.s
-	@echo ... target_selection_test_FP.obj
-	@echo ... target_selection_test_FP.i
-	@echo ... target_selection_test_FP.s
+	@echo ... target_selection.obj
+	@echo ... target_selection.i
+	@echo ... target_selection.s
+	@echo ... target_selection_test_ST.obj
+	@echo ... target_selection_test_ST.i
+	@echo ... target_selection_test_ST.s
 .PHONY : help
 
 

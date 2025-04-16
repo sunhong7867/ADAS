@@ -1,15 +1,15 @@
 [
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\lane_selection.c.obj -c C:\\Projects\\GoogleTestProject\\lane_selection.c",
-  "file": "C:/Projects/GoogleTestProject/lane_selection.c",
-  "output": "CMakeFiles/adas.dir/lane_selection.c.obj"
+  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\target_selection.c.obj -c C:\\Projects\\GoogleTestProject\\target_selection.c",
+  "file": "C:/Projects/GoogleTestProject/target_selection.c",
+  "output": "CMakeFiles/adas.dir/target_selection.c.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\adas_unit_tests.dir\\target_selection_test_FP.cpp.obj -c C:\\Projects\\GoogleTestProject\\target_selection_test_FP.cpp",
-  "file": "C:/Projects/GoogleTestProject/target_selection_test_FP.cpp",
-  "output": "CMakeFiles/adas_unit_tests.dir/target_selection_test_FP.cpp.obj"
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\adas_unit_tests.dir\\target_selection_test_ST.cpp.obj -c C:\\Projects\\GoogleTestProject\\target_selection_test_ST.cpp",
+  "file": "C:/Projects/GoogleTestProject/target_selection_test_ST.cpp",
+  "output": "CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build/googletest/googlemock",

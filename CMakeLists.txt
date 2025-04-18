@@ -16,9 +16,9 @@ enable_testing()
 
 # 대상 라이브러리 추가
 add_library(adas
-    ego_vehicle_estimation.c
+    #ego_vehicle_estimation.c
 	#lane_selection.c
-	#target_selection.c
+	target_selection.c
 
     # 추가 ADAS 관련 C 소스 파일이 있다면 여기에 나열하세요.
 )
@@ -26,10 +26,17 @@ add_library(adas
 # 테스트 실행 파일 추가
 add_executable(adas_unit_tests 
     #ego_vehicle_estimation_test_EQ.cpp
-	ego_vehicle_estimation_test_RA.cpp
+	#ego_vehicle_estimation_test_RA.cpp
 	#ego_vehicle_estimation_test_BV.cpp
 	#lane_selection_test.cpp
-	#target_selection_test.cpp
+	#target_selection_test_ST.cpp
+	#target_selection_test_FP.cpp
+	#target_selection_test_SA.cpp
+	#acc_test_MS.cpp
+	#acc_test_AD_EQ.cpp
+	#acc_test_AD_BV.cpp
+	#acc_test_AD_RA.cpp
+	
 
 	# 추가 ADAS 관련 테스트 C++ 소스 파일이 있다면 여기에 나열하세요.
 )

@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-ego_vehicle_estimation.obj: ego_vehicle_estimation.c.obj
-.PHONY : ego_vehicle_estimation.obj
+target_selection.obj: target_selection.c.obj
+.PHONY : target_selection.obj
 
 # target to build an object file
-ego_vehicle_estimation.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/ego_vehicle_estimation.c.obj
-.PHONY : ego_vehicle_estimation.c.obj
+target_selection.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.obj
+.PHONY : target_selection.c.obj
 
-ego_vehicle_estimation.i: ego_vehicle_estimation.c.i
-.PHONY : ego_vehicle_estimation.i
+target_selection.i: target_selection.c.i
+.PHONY : target_selection.i
 
 # target to preprocess a source file
-ego_vehicle_estimation.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/ego_vehicle_estimation.c.i
-.PHONY : ego_vehicle_estimation.c.i
+target_selection.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.i
+.PHONY : target_selection.c.i
 
-ego_vehicle_estimation.s: ego_vehicle_estimation.c.s
-.PHONY : ego_vehicle_estimation.s
+target_selection.s: target_selection.c.s
+.PHONY : target_selection.s
 
 # target to generate assembly for a file
-ego_vehicle_estimation.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/ego_vehicle_estimation.c.s
-.PHONY : ego_vehicle_estimation.c.s
+target_selection.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.s
+.PHONY : target_selection.c.s
 
-ego_vehicle_estimation_test_RA.obj: ego_vehicle_estimation_test_RA.cpp.obj
-.PHONY : ego_vehicle_estimation_test_RA.obj
+target_selection_test_ST.obj: target_selection_test_ST.cpp.obj
+.PHONY : target_selection_test_ST.obj
 
 # target to build an object file
-ego_vehicle_estimation_test_RA.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_RA.cpp.obj
-.PHONY : ego_vehicle_estimation_test_RA.cpp.obj
+target_selection_test_ST.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.obj
+.PHONY : target_selection_test_ST.cpp.obj
 
-ego_vehicle_estimation_test_RA.i: ego_vehicle_estimation_test_RA.cpp.i
-.PHONY : ego_vehicle_estimation_test_RA.i
+target_selection_test_ST.i: target_selection_test_ST.cpp.i
+.PHONY : target_selection_test_ST.i
 
 # target to preprocess a source file
-ego_vehicle_estimation_test_RA.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_RA.cpp.i
-.PHONY : ego_vehicle_estimation_test_RA.cpp.i
+target_selection_test_ST.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.i
+.PHONY : target_selection_test_ST.cpp.i
 
-ego_vehicle_estimation_test_RA.s: ego_vehicle_estimation_test_RA.cpp.s
-.PHONY : ego_vehicle_estimation_test_RA.s
+target_selection_test_ST.s: target_selection_test_ST.cpp.s
+.PHONY : target_selection_test_ST.s
 
 # target to generate assembly for a file
-ego_vehicle_estimation_test_RA.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_test_RA.cpp.s
-.PHONY : ego_vehicle_estimation_test_RA.cpp.s
+target_selection_test_ST.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.s
+.PHONY : target_selection_test_ST.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... ego_vehicle_estimation.obj
-	@echo ... ego_vehicle_estimation.i
-	@echo ... ego_vehicle_estimation.s
-	@echo ... ego_vehicle_estimation_test_RA.obj
-	@echo ... ego_vehicle_estimation_test_RA.i
-	@echo ... ego_vehicle_estimation_test_RA.s
+	@echo ... target_selection.obj
+	@echo ... target_selection.i
+	@echo ... target_selection.s
+	@echo ... target_selection_test_ST.obj
+	@echo ... target_selection_test_ST.i
+	@echo ... target_selection_test_ST.s
 .PHONY : help
 
 

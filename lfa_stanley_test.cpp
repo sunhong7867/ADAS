@@ -18,8 +18,7 @@
 #include "adas_shared.h"      // EgoData_t
 
 #ifdef UNIT_TEST
-/* DUT 내부 상수/훅 노출 (gain 고정, clamp 기준 등) */
-extern float g_stanleyGain;                    // lfa.c 에 정의된 Stanley gain (기본 1.0)
+extern float g_stanleyGain;   // Stanley gain (lfa.c)
 #endif
 
 /*──────────────────────────────────────────────────────────────────*/
@@ -30,7 +29,6 @@ static Lane_Data_LS_t makeLaneOut(float headingDeg, float offsetM)
     o.LS_Lane_Offset   = offsetM;
     return o;
 }
-
 static Ego_Data_t makeEgo(float vel)
 {
     Ego_Data_t e{}; std::memset(&e, 0, sizeof(e));
@@ -39,16 +37,15 @@ static Ego_Data_t makeEgo(float vel)
 }
 
 static constexpr float TOL = 1e-4f;
-static constexpr float YAW_CLAMP = 540.0f;     // 시스템 조향 한계
-static constexpr float MIN_VEL   = 0.1f;       // 내부 최소 속도 클램프
+static constexpr float YAW_CLAMP = 540.0f;
+static constexpr float MIN_VEL   = 0.1f;
 
-/* 테스트 픽스처 */
+/* 테스트 픽스처 ---------------------------------------------------*/
 class StanleyTest : public ::testing::Test
 {
 protected:
     Lane_Data_LS_t lane;
-    Ego_Data_t          ego;
-
+    Ego_Data_t     ego;
     void SetUp() override {
         lane = makeLaneOut(0.0f, 0.0f);
         ego  = makeEgo(20.0f);
@@ -62,371 +59,313 @@ protected:
 };
 
 /*******************************************************************
- * 1) EQ 20 TC – 동등 분할
+ * 1) EQ 20
  ******************************************************************/
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_01_ZeroInput) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_01) {
     lane = makeLaneOut(0,0);
     EXPECT_NEAR(call(), 0.0f, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_02_PosHeading_PosOutput) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_02) {
     lane = makeLaneOut(30,0);
     EXPECT_GT(call(), 0.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_03_NegHeading_NegOutput) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_03) {
     lane = makeLaneOut(-30,0);
     EXPECT_LT(call(), 0.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_04_PosOffset_PosOutput) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_04) {
     lane = makeLaneOut(0,1.0f);
     EXPECT_GT(call(), 0.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_05_NegOffset_NegOutput) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_05) {
     lane = makeLaneOut(0,-1.0f);
     EXPECT_LT(call(), 0.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_06_MaxPosClamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_06) {
     lane = makeLaneOut(180,2.0f);
     EXPECT_NEAR(call(), YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_07_MaxNegClamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_07) {
     lane = makeLaneOut(-180,-2.0f);
     EXPECT_NEAR(call(), -YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_08_VelocityLowClamped) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_08) {
     lane = makeLaneOut(20,1.0f);
     ego  = makeEgo(0.05f);
     float res = call();
     float expect = 20.0f + static_cast<float>(std::atan2(1.0f, MIN_VEL) * 180.0 / M_PI);
     EXPECT_NEAR(res, expect, 1e-2f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_09_VelocityNaN_ReturnZero) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_09) {
     lane = makeLaneOut(20,1.0f);
     ego  = makeEgo(NAN);
     EXPECT_NEAR(call(), 0.0f, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_10_OffsetNaN_Safe) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_10) {
     lane = makeLaneOut(20, NAN);
-    EXPECT_TRUE(std::isnan(call()) || std::fabs(call()) < 1e-6f);
+    float out = call();
+    EXPECT_TRUE(std::isnan(out) || std::fabs(out) < 1e-6f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_11_HeadingInf_Clamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_11) {
     lane = makeLaneOut(INFINITY,0);
     EXPECT_NEAR(call(), YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_12_Output5399_NoClamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_12) {
     lane = makeLaneOut(500,10);
     float out = call();
-    EXPECT_NEAR(out, 539.9f, 5.0f);  // ±5 허용
+    EXPECT_NEAR(out, 539.9f, 5.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_13_Output5401_Clamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_13) {
     lane = makeLaneOut(600,10);
     EXPECT_NEAR(call(), YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_14_NullPtr_ReturnZero) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_14) {
     EXPECT_NEAR(calculate_steer_in_high_speed_stanley(nullptr, &lane), 0.0f, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_15_UninitMembers_Fallback) {
-    Lane_Data_LS_t dummy; // 미초기화
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_15) {
+    Lane_Data_LS_t dummy;
     EXPECT_NEAR(calculate_steer_in_high_speed_stanley(&ego, &dummy), 0.0f, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_16_OffsetZeroHighVel) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_16) {
     lane = makeLaneOut(30,0);
     ego  = makeEgo(100.0f);
-    EXPECT_NEAR(call(),30.0f,1e-2f);
+    EXPECT_NEAR(call(), 30.0f, 1e-2f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_17_SmallVelOffsetEffect) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_17) {
     lane = makeLaneOut(0,1.0f);
     ego  = makeEgo(1.0f);
-    EXPECT_NEAR(call(),45.0f,1.0f);
+    EXPECT_NEAR(call(), 45.0f, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_18_VeryHighVel_SmallEffect) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_18) {
     lane = makeLaneOut(30,1.0f);
     ego  = makeEgo(1000.0f);
-    float out = call();
-    EXPECT_NEAR(out,30.057f,0.1f);
+    EXPECT_NEAR(call(), 30.057f, 0.1f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_19_GainFixedProportional) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_19) {
     lane = makeLaneOut(20,1);
-    float out = call();
     float expect = 20 + static_cast<float>(std::atan2(1,20)*180/M_PI);
-    EXPECT_NEAR(out, expect, 1e-2f);
+    EXPECT_NEAR(call(), expect, 1e-2f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_EQ_20_HeadingOnly90) {
+TEST_F(StanleyTest, TC_LFA_STAN_EQ_20) {
     lane = makeLaneOut(90,0);
-    EXPECT_NEAR(call(),90.0f,TOL);
+    EXPECT_NEAR(call(), 90.0f, TOL);
 }
 
 /*******************************************************************
- * 2) BV 20 TC – 경계값 분석
+ * 2) BV 20
  ******************************************************************/
-TEST_F(StanleyTest, TC_LFA_STAN_BV_01_MinHeading) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_01) {
     lane = makeLaneOut(-180,0);
     EXPECT_NEAR(call(), -180.0f, 1e-2f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_02_MaxHeading) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_02) {
     lane = makeLaneOut(180,0);
     EXPECT_NEAR(call(), 180.0f, 1e-2f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_03_MinOffset) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_03) {
     lane = makeLaneOut(0,-2);
     float expect = static_cast<float>(-std::atan2(2.0,20.0)*180/M_PI);
     EXPECT_NEAR(call(), expect, 0.5f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_04_MaxOffset) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_04) {
     lane = makeLaneOut(0,2);
     float expect = static_cast<float>(std::atan2(2.0,20.0)*180/M_PI);
     EXPECT_NEAR(call(), expect, 0.5f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_05_VelZero_MinClamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_05) {
     lane = makeLaneOut(0,1);
     ego  = makeEgo(0);
     float expect = static_cast<float>(std::atan2(1,MIN_VEL)*180/M_PI);
     EXPECT_NEAR(call(), expect, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_06_VelPointOne) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_06) {
     lane = makeLaneOut(0,1);
     ego  = makeEgo(0.1f);
     float expect = static_cast<float>(std::atan2(1,0.1f)*180/M_PI);
     EXPECT_NEAR(call(), expect, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_07_Vel100) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_07) {
     lane = makeLaneOut(0,1);
     ego  = makeEgo(100);
     float expect = static_cast<float>(std::atan2(1,100)*180/M_PI);
     EXPECT_NEAR(call(), expect, 0.1f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_08_TinyOffsetPos) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_08) {
     lane = makeLaneOut(0,0.0001f);
     float expect = static_cast<float>(std::atan2(0.0001,20)*180/M_PI);
     EXPECT_NEAR(call(), expect, 1e-3f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_09_TinyOffsetNeg) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_09) {
     lane = makeLaneOut(0,-0.0001f);
     float expect = static_cast<float>(std::atan2(-0.0001,20)*180/M_PI);
     EXPECT_NEAR(call(), expect, 1e-3f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_10_VelFLTMIN) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_10) {
     lane = makeLaneOut(30,1);
     ego  = makeEgo(FLT_MIN);
     float out = call();
     EXPECT_LE(out, YAW_CLAMP);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_11_VelFLTMAX) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_11) {
     lane = makeLaneOut(30,1);
     ego  = makeEgo(FLT_MAX);
     float out = call();
     EXPECT_GE(out, -YAW_CLAMP);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_12_Output54001_Clamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_12) {
     lane = makeLaneOut(600,10);
     EXPECT_NEAR(call(), YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_13_OutputNeg54001_Clamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_13) {
     lane = makeLaneOut(-600,-10);
     EXPECT_NEAR(call(), -YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_14_Atan90Deg) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_14) {
     lane = makeLaneOut(0,1);
-    ego  = makeEgo(MIN_VEL); // atan2(1,0.1)≈84°, not 90 but close
+    ego  = makeEgo(MIN_VEL);
     float out = call();
     EXPECT_NEAR(out, 84.3f, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_15_AtanMinus90) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_15) {
     lane = makeLaneOut(0,-1);
     ego  = makeEgo(MIN_VEL);
     float out = call();
     EXPECT_NEAR(out, -84.3f, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_16_ClampExactNeg540) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_16) {
     lane = makeLaneOut(-1000,-10);
     EXPECT_NEAR(call(), -YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_17_ClampExact540) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_17) {
     lane = makeLaneOut(1000,10);
     EXPECT_NEAR(call(), YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_18_OutputZeroStability) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_18) {
     lane = makeLaneOut(0,0);
     EXPECT_NEAR(call(), 0.0f, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_19_GainOffsetZeroInfluence) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_19) {
     lane = makeLaneOut(30,0);
     EXPECT_NEAR(call(), 30.0f, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_BV_20_GainCTEEqualsVel) {
+TEST_F(StanleyTest, TC_LFA_STAN_BV_20) {
     lane = makeLaneOut(30,1);
     ego  = makeEgo(1);
-    float expect = 30 + 45.0f; // atan2(1,1)=45 deg
+    float expect = 30 + 45.0f;
     EXPECT_NEAR(call(), expect, 1.0f);
 }
 
 /*******************************************************************
- * 3) RA 20 TC – 요구사항 분석
+ * 3) RA 20
  ******************************************************************/
-TEST_F(StanleyTest, TC_LFA_STAN_RA_01_VelBelowMinClamped) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_01) {
     lane = makeLaneOut(20,1);
     ego  = makeEgo(0.05f);
     float res = call();
     float expect = 20 + static_cast<float>(std::atan2(1,MIN_VEL)*180/M_PI);
     EXPECT_NEAR(res, expect, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_02_FormulaAccuracy) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_02) {
     lane = makeLaneOut(30,1);
     ego  = makeEgo(20);
     float expect = 30 + static_cast<float>(std::atan2(1,20)*180/M_PI);
     EXPECT_NEAR(call(), expect, 0.1f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_03_AtanSign) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_03) {
     lane = makeLaneOut(-10,1);
     ego  = makeEgo(20);
     float expect = -10 + static_cast<float>(std::atan2(1,20)*180/M_PI);
     EXPECT_NEAR(call(), expect, 0.1f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_04_ClampApplied) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_04) {
     lane = makeLaneOut(600,10);
     EXPECT_NEAR(call(), YAW_CLAMP, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_05_HeadingOnly) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_05) {
     lane = makeLaneOut(40,0);
-    EXPECT_NEAR(call(),40.0f,0.1f);
+    EXPECT_NEAR(call(), 40.0f, 0.1f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_06_OffsetOnly) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_06) {
     lane = makeLaneOut(0,1);
     ego  = makeEgo(20);
     float expect = static_cast<float>(std::atan2(1,20)*180/M_PI);
     EXPECT_NEAR(call(), expect, 0.1f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_07_HighSpeed_Decrease) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_07) {
     lane = makeLaneOut(30,1);
-    ego = makeEgo(20);
+    ego  = makeEgo(20);
     float low = call();
-    ego = makeEgo(100);
+    ego  = makeEgo(100);
     float high = call();
     EXPECT_LT(high, low);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_08_NullPtrSafe) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_08) {
     EXPECT_NEAR(calculate_steer_in_high_speed_stanley(&ego, nullptr), 0.0f, TOL);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_09_OffsetNaN_Safe) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_09) {
     lane = makeLaneOut(20,NAN);
     float res = call();
-    EXPECT_TRUE(std::isnan(res) || std::fabs(res)<1e-6f);
+    EXPECT_TRUE(std::isnan(res) || std::fabs(res) < 1e-6f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_10_OutputFinite) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_10) {
     lane = makeLaneOut(400,4);
     EXPECT_TRUE(std::isfinite(call()));
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_11_RadToDegPi) {
-    lane = makeLaneOut(0,MIN_VEL); // offset==vel -> atan2(0.1,0.1)=45
+TEST_F(StanleyTest, TC_LFA_STAN_RA_11) {
+    lane = makeLaneOut(0,MIN_VEL);
     ego  = makeEgo(MIN_VEL);
     float out = call();
-    EXPECT_NEAR(out,45.0f,1.0f);
+    EXPECT_NEAR(out, 45.0f, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_12_GainStable) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_12) {
     lane = makeLaneOut(20,1);
     float a = call();
     float b = call();
-    EXPECT_NEAR(a,b,1e-4f);
+    EXPECT_NEAR(a, b, 1e-4f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_13_SteeringEqualsHeadingWhenOffsetZero) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_13) {
     lane = makeLaneOut(40,0);
-    EXPECT_NEAR(call(),40.0f,0.1f);
+    EXPECT_NEAR(call(), 40.0f, 0.1f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_14_ExceptionValueRobust) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_14) {
     lane = makeLaneOut(INFINITY,NAN);
-    EXPECT_NEAR(call(),0.0f,1.0f);
+    EXPECT_NEAR(call(), 0.0f, 1.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_15_ReentrantConsistency) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_15) {
     lane = makeLaneOut(20,1);
     float first = call();
     float second = call();
     EXPECT_NEAR(first, second, 1e-4f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_16_NumericExtremesNoOverflow) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_16) {
     lane = makeLaneOut(20,1);
     ego  = makeEgo(FLT_MAX);
     float out = call();
     EXPECT_LE(out, YAW_CLAMP);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_17_OffsetRapidChange) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_17) {
     lane = makeLaneOut(10,0.5f);
     float a = call();
     lane.LS_Lane_Offset = 1.5f;
     float b = call();
-    EXPECT_LT(std::fabs(b-a),100.0f);
+    EXPECT_LT(std::fabs(b - a), 100.0f);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_18_SpeedInfluencesSteer) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_18) {
     lane = makeLaneOut(30,1);
-    ego = makeEgo(20);
+    ego  = makeEgo(20);
     float slow = call();
-    ego = makeEgo(100);
+    ego  = makeEgo(100);
     float fast = call();
     EXPECT_LT(fast, slow);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_19_HeadingChangeReflectsSteer) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_19) {
     lane = makeLaneOut(10,0);
     float a = call();
     lane.LS_Heading_Error = 20;
     float b = call();
     EXPECT_GT(b, a);
 }
-
-TEST_F(StanleyTest, TC_LFA_STAN_RA_20_VelBelowThresholdAutoClamp) {
+TEST_F(StanleyTest, TC_LFA_STAN_RA_20) {
     lane = makeLaneOut(20,1);
     ego  = makeEgo(0.05f);
     float expect = 20 + static_cast<float>(std::atan2(1,MIN_VEL)*180/M_PI);

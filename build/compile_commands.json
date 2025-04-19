@@ -1,15 +1,15 @@
 [
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\aeb.c.obj -c C:\\Projects\\GoogleTestProject\\aeb.c",
-  "file": "C:/Projects/GoogleTestProject/aeb.c",
-  "output": "CMakeFiles/adas.dir/aeb.c.obj"
+  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\lfa.c.obj -c C:\\Projects\\GoogleTestProject\\lfa.c",
+  "file": "C:/Projects/GoogleTestProject/lfa.c",
+  "output": "CMakeFiles/adas.dir/lfa.c.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\adas_unit_tests.dir\\aeb_ttc_test.cpp.obj -c C:\\Projects\\GoogleTestProject\\aeb_ttc_test.cpp",
-  "file": "C:/Projects/GoogleTestProject/aeb_ttc_test.cpp",
-  "output": "CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.obj"
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\adas_unit_tests.dir\\lfa_output_test.cpp.obj -c C:\\Projects\\GoogleTestProject\\lfa_output_test.cpp",
+  "file": "C:/Projects/GoogleTestProject/lfa_output_test.cpp",
+  "output": "CMakeFiles/adas_unit_tests.dir/lfa_output_test.cpp.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build/googletest/googlemock",

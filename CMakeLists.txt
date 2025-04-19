@@ -20,8 +20,8 @@ add_library(adas
 	#lane_selection.c
 	#target_selection.c
 	#acc.c
-	aeb.c
-	#lfa.c
+	#aeb.c
+	lfa.c
 	#arbitration.c
 )
 
@@ -44,14 +44,14 @@ add_executable(adas_unit_tests
 	#acc_speed_pid_test.cpp
 	#acc_out_test.cpp
 
-	aeb_ttc_test.cpp
+	#aeb_ttc_test.cpp
 	#aeb_mode_test.cpp
 	#aeb_decel_test.cpp
 
 	#lfa_mode_test.cpp
 	#lfa_pid_test.cpp
 	#lfa_stanley_test.cpp
-	#lfa_output_test.cpp
+	lfa_output_test.cpp
 
 	#arbitration_test.cpp
 )

@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-aeb.obj: aeb.c.obj
-.PHONY : aeb.obj
+lfa.obj: lfa.c.obj
+.PHONY : lfa.obj
 
 # target to build an object file
-aeb.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.obj
-.PHONY : aeb.c.obj
+lfa.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.obj
+.PHONY : lfa.c.obj
 
-aeb.i: aeb.c.i
-.PHONY : aeb.i
+lfa.i: lfa.c.i
+.PHONY : lfa.i
 
 # target to preprocess a source file
-aeb.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.i
-.PHONY : aeb.c.i
+lfa.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.i
+.PHONY : lfa.c.i
 
-aeb.s: aeb.c.s
-.PHONY : aeb.s
+lfa.s: lfa.c.s
+.PHONY : lfa.s
 
 # target to generate assembly for a file
-aeb.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.s
-.PHONY : aeb.c.s
+lfa.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.s
+.PHONY : lfa.c.s
 
-aeb_ttc_test.obj: aeb_ttc_test.cpp.obj
-.PHONY : aeb_ttc_test.obj
+lfa_output_test.obj: lfa_output_test.cpp.obj
+.PHONY : lfa_output_test.obj
 
 # target to build an object file
-aeb_ttc_test.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.obj
-.PHONY : aeb_ttc_test.cpp.obj
+lfa_output_test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_output_test.cpp.obj
+.PHONY : lfa_output_test.cpp.obj
 
-aeb_ttc_test.i: aeb_ttc_test.cpp.i
-.PHONY : aeb_ttc_test.i
+lfa_output_test.i: lfa_output_test.cpp.i
+.PHONY : lfa_output_test.i
 
 # target to preprocess a source file
-aeb_ttc_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.i
-.PHONY : aeb_ttc_test.cpp.i
+lfa_output_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_output_test.cpp.i
+.PHONY : lfa_output_test.cpp.i
 
-aeb_ttc_test.s: aeb_ttc_test.cpp.s
-.PHONY : aeb_ttc_test.s
+lfa_output_test.s: lfa_output_test.cpp.s
+.PHONY : lfa_output_test.s
 
 # target to generate assembly for a file
-aeb_ttc_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.s
-.PHONY : aeb_ttc_test.cpp.s
+lfa_output_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_output_test.cpp.s
+.PHONY : lfa_output_test.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... aeb.obj
-	@echo ... aeb.i
-	@echo ... aeb.s
-	@echo ... aeb_ttc_test.obj
-	@echo ... aeb_ttc_test.i
-	@echo ... aeb_ttc_test.s
+	@echo ... lfa.obj
+	@echo ... lfa.i
+	@echo ... lfa.s
+	@echo ... lfa_output_test.obj
+	@echo ... lfa_output_test.i
+	@echo ... lfa_output_test.s
 .PHONY : help
 
 

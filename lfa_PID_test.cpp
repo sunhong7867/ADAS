@@ -18,7 +18,7 @@
 
 /*--------------------------------------------------------------------
  * DUT 내부의 적분 / 이전 오차 변수 테스트‑용 외부 노출
- *  (lfa.c 내부에서  #ifdef UNIT_TEST  extern float g_pidIntegral; ...)
+ *  (lfa.c 내부에서  #ifdef UNIT_TEST  extern float g_pidIntegral; ...)
  *------------------------------------------------------------------*/
 #ifdef UNIT_TEST
 extern float g_pidIntegral;
@@ -36,7 +36,7 @@ static Lane_Data_LS_t makeLaneOut(float headingDeg, float offsetM)
 }
 
 static constexpr float TOL = 1e-4f;          // 비교 허용 오차
-static constexpr float YAW_CLAMP = 27.0f;    // road‑wheel 최대/최소 조향각
+static constexpr float YAW_CLAMP = 540.0f;   // 시스템 최대/최소 조향각
 
 /* 테스트 픽스처 */
 class LfaPidTest : public ::testing::Test
@@ -60,74 +60,74 @@ protected:
 /*******************************************************************
  * 1) EQ 20 TC ‑‑ 동등 분할
  ******************************************************************/
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_01_ZeroInputExpectZero)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_01)
 {
     lane = makeLaneOut(0.0f, 0.0f);
     EXPECT_NEAR(call(1.0f), 0.0f, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_02_PosHeading_PosOutput)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_02)
 {
     lane = makeLaneOut(30.0f, 0.0f);
     EXPECT_GT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_03_NegHeading_NegOutput)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_03)
 {
     lane = makeLaneOut(-30.0f, 0.0f);
     EXPECT_LT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_04_PosOffset_PosOutput)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_04)
 {
     lane = makeLaneOut(0.0f, 1.0f);
     EXPECT_GT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_05_NegOffset_NegOutput)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_05)
 {
     lane = makeLaneOut(0.0f, -1.0f);
     EXPECT_LT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_06_MaxPositiveClamp)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_06)
 {
     lane = makeLaneOut(180.0f, 2.0f);
     EXPECT_NEAR(call(1.0f), YAW_CLAMP, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_07_MaxNegativeClamp)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_07)
 {
     lane = makeLaneOut(-180.0f, -2.0f);
     EXPECT_NEAR(call(1.0f), -YAW_CLAMP, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_08_NaN_Offset_ReturnNaN)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_08)
 {
     lane = makeLaneOut(30.0f, NAN);
     float out = call(1.0f);
     EXPECT_TRUE(std::isnan(out));
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_09_INF_Heading_Clamped)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_09)
 {
     lane = makeLaneOut(INFINITY, 0.0f);
     EXPECT_NEAR(call(1.0f), YAW_CLAMP, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_10_DeltaTimeZero_ReturnZero)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_10)
 {
     lane = makeLaneOut(30.0f, 1.0f);
     EXPECT_NEAR(call(0.0f), 0.0f, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_11_DeltaTimeNegative_ReturnZero)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_11)
 {
     lane = makeLaneOut(30.0f, 1.0f);
     EXPECT_NEAR(call(-1.0f), 0.0f, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_12_BaseFormulaCheck)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_12)
 {
     lane = makeLaneOut(1.0f, 1.0f);        // Error = 2
     float out = call(1.0f);                // Kp=0.1, Ki=0.01, Kd=0.005
@@ -135,19 +135,19 @@ TEST_F(LfaPidTest, TC_LFA_PID_EQ_12_BaseFormulaCheck)
     EXPECT_NEAR(out, expect, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_13_LargePosHeading)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_13)
 {
     lane = makeLaneOut(90.0f, 0.0f);
     EXPECT_GT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_14_LateralLargePositive)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_14)
 {
     lane = makeLaneOut(0.0f, 2.0f);
     EXPECT_GT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_15_IntegralSaturationPos)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_15)
 {
 #ifdef UNIT_TEST
     g_pidIntegral = 1e6f;
@@ -157,7 +157,7 @@ TEST_F(LfaPidTest, TC_LFA_PID_EQ_15_IntegralSaturationPos)
     EXPECT_LE(out, YAW_CLAMP);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_16_IntegralSaturationNeg)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_16)
 {
 #ifdef UNIT_TEST
     g_pidIntegral = -1e6f;
@@ -167,7 +167,7 @@ TEST_F(LfaPidTest, TC_LFA_PID_EQ_16_IntegralSaturationNeg)
     EXPECT_GE(out, -YAW_CLAMP);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_17_PosDerivative)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_17)
 {
 #ifdef UNIT_TEST
     g_pidPrevError = 0.0f;
@@ -177,7 +177,7 @@ TEST_F(LfaPidTest, TC_LFA_PID_EQ_17_PosDerivative)
     EXPECT_GT(out, 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_18_NegDerivative)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_18)
 {
 #ifdef UNIT_TEST
     g_pidPrevError = 2.0f;
@@ -187,12 +187,12 @@ TEST_F(LfaPidTest, TC_LFA_PID_EQ_18_NegDerivative)
     EXPECT_LT(out, 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_19_NullPtr_ReturnZero)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_19)
 {
     EXPECT_NEAR(calculate_steer_in_low_speed_pid(nullptr, 1.0f), 0.0f, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_EQ_20_ClampAlwaysWithinRange)
+TEST_F(LfaPidTest, TC_LFA_PID_EQ_20)
 {
     lane = makeLaneOut(500.0f, 5.0f);
     float out = call(1.0f);
@@ -203,71 +203,70 @@ TEST_F(LfaPidTest, TC_LFA_PID_EQ_20_ClampAlwaysWithinRange)
 /*******************************************************************
  * 2) BV 20 TC ‑‑ 경계값 분석
  ******************************************************************/
-TEST_F(LfaPidTest, TC_LFA_PID_BV_01_MinHeadingNeg180)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_01)
 {
     lane = makeLaneOut(-180.0f, 0.0f);
     EXPECT_NEAR(call(1.0f), -20.7f, 1e-1f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_02_MaxHeading180)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_02)
 {
     lane = makeLaneOut(180.0f, 0.0f);
     EXPECT_NEAR(call(1.0f), 20.7f, 1e-1f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_03_MinOffsetNeg2)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_03)
 {
     lane = makeLaneOut(0.0f, -2.0f);
     EXPECT_LT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_04_MaxOffset2)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_04)
 {
     lane = makeLaneOut(0.0f, 2.0f);
     EXPECT_GT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_05_SmallDt)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_05)
 {
     lane = makeLaneOut(10.0f, 1.0f);
     float out = call(0.00001f);
-    /* 미분항 영향이 큼 → clamp 확인 */
     EXPECT_LE(out, YAW_CLAMP);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_06_DtZero_ReturnZero)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_06)
 {
     lane = makeLaneOut(30.0f, 1.0f);
     EXPECT_NEAR(call(0.0f), 0.0f, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_07_ClampPos5399)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_07)
 {
     lane = makeLaneOut(500.0f, 10.0f);
     float out = call(1.0f);
     EXPECT_NEAR(out, 539.9f, 1.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_08_ClampPos5401)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_08)
 {
     lane = makeLaneOut(600.0f, 10.0f);
     EXPECT_NEAR(call(1.0f), YAW_CLAMP, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_09_ClampNeg5399)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_09)
 {
     lane = makeLaneOut(-500.0f, -10.0f);
     float out = call(1.0f);
     EXPECT_NEAR(out, -539.9f, 1.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_10_ClampNeg5401)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_10)
 {
     lane = makeLaneOut(-600.0f, -10.0f);
     EXPECT_NEAR(call(1.0f), -YAW_CLAMP, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_11_DerivativeOverflow)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_11)
 {
 #ifdef UNIT_TEST
     g_pidPrevError = 0.0f;
@@ -277,7 +276,7 @@ TEST_F(LfaPidTest, TC_LFA_PID_BV_11_DerivativeOverflow)
     EXPECT_NEAR(out, YAW_CLAMP, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_12_IntegralOverflow)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_12)
 {
 #ifdef UNIT_TEST
     g_pidIntegral = FLT_MAX;
@@ -287,53 +286,54 @@ TEST_F(LfaPidTest, TC_LFA_PID_BV_12_IntegralOverflow)
     EXPECT_NEAR(out, YAW_CLAMP, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_13_TinyHeadingPos)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_13)
 {
     lane = makeLaneOut(0.0001f, 0.0f);
     EXPECT_GT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_14_TinyHeadingNeg)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_14)
 {
     lane = makeLaneOut(-0.0001f, 0.0f);
     EXPECT_LT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_15_TinyOffsetPos)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_15)
 {
     lane = makeLaneOut(0.0f, 0.0001f);
     EXPECT_GT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_16_TinyOffsetNeg)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_16)
 {
     lane = makeLaneOut(0.0f, -0.0001f);
     EXPECT_LT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_17_DtFLTMAX)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_17)
 {
     lane = makeLaneOut(10.0f, 1.0f);
     float out = call(FLT_MAX);
     EXPECT_LE(out, YAW_CLAMP);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_18_GainChangeSensitivity)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_18)
 {
-    /* baseline */
+#ifdef UNIT_TEST
+    g_pidPrevError = 0.0f;
+#endif
     lane = makeLaneOut(10.0f, 1.0f);
     float out1 = call(1.0f);
 #ifdef UNIT_TEST
-    /* gains 변경 → lfa.c 내부 조건부 컴파일 예: TEST_GAIN_SET */
-    extern void pid_set_gains(float kp, float ki, float kd);
-    pid_set_gains(0.2f, 0.02f, 0.01f);
+    extern void pid_set_gains(float,float,float);
+    pid_set_gains(0.2f,0.02f,0.01f);
 #endif
     lane = makeLaneOut(10.0f, 1.0f);
     float out2 = call(1.0f);
     EXPECT_NE(out1, out2);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_19_DerivativeNegative)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_19)
 {
 #ifdef UNIT_TEST
     g_pidPrevError = 100.0f;
@@ -342,7 +342,7 @@ TEST_F(LfaPidTest, TC_LFA_PID_BV_19_DerivativeNegative)
     EXPECT_LT(call(1.0f), 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_BV_20_ErrorZero_OutputZero)
+TEST_F(LfaPidTest, TC_LFA_PID_BV_20)
 {
     lane = makeLaneOut(0.0f, 0.0f);
     EXPECT_NEAR(call(1.0f), 0.0f, TOL);
@@ -351,7 +351,7 @@ TEST_F(LfaPidTest, TC_LFA_PID_BV_20_ErrorZero_OutputZero)
 /*******************************************************************
  * 3) RA 20 TC ‑‑ 요구사항 분석
  ******************************************************************/
-TEST_F(LfaPidTest, TC_LFA_PID_RA_01_FormulaTermsApplied)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_01)
 {
     lane = makeLaneOut(5.0f, 1.0f);            // Error = 6
 #ifdef UNIT_TEST
@@ -363,75 +363,75 @@ TEST_F(LfaPidTest, TC_LFA_PID_RA_01_FormulaTermsApplied)
     EXPECT_NEAR(out, expect, 1e-3f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_02_InternalStateAccumulates)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_02)
 {
     lane = makeLaneOut(5.0f, 0.0f);  // Error = 5
-    float out1 = call(1.0f);         // first
-    float out2 = call(1.0f);         // second → integral 증가
+    float out1 = call(1.0f);
+    float out2 = call(1.0f);
     EXPECT_GT(std::fabs(out2), std::fabs(out1));
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_03_SmallDtAmplifiesDerivative)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_03)
 {
 #ifdef UNIT_TEST
     g_pidPrevError = 0.0f;
 #endif
-    lane = makeLaneOut(10.0f, 1.0f);       // Error=11
+    lane = makeLaneOut(10.0f, 1.0f);
     float out = call(0.0001f);
     EXPECT_LE(out, YAW_CLAMP);
-    EXPECT_GT(std::fabs(out), 1000.0f);    // 큰 증폭 확인
+    EXPECT_GT(std::fabs(out), 1000.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_04_GainChangeEffect)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_04)
 {
 #ifdef UNIT_TEST
-    extern void pid_set_gains(float kp, float ki, float kd);
-    pid_set_gains(0.05f, 0.0f, 0.0f);
+    extern void pid_set_gains(float,float,float);
+    pid_set_gains(0.05f,0.0f,0.0f);
 #endif
     lane = makeLaneOut(10.0f, 0.0f);
     float lowGain = call(1.0f);
 #ifdef UNIT_TEST
-    pid_set_gains(0.2f, 0.0f, 0.0f);
+    pid_set_gains(0.2f,0.0f,0.0f);
 #endif
     lane = makeLaneOut(10.0f, 0.0f);
     float highGain = call(1.0f);
     EXPECT_GT(std::fabs(highGain), std::fabs(lowGain));
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_05_P_Only)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_05)
 {
 #ifdef UNIT_TEST
-    pid_set_gains(0.1f, 0.0f, 0.0f);
+    pid_set_gains(0.1f,0.0f,0.0f);
 #endif
-    lane = makeLaneOut(10.0f, 1.0f);    // Error=11
+    lane = makeLaneOut(10.0f, 1.0f);
     float out = call(1.0f);
     EXPECT_NEAR(out, 0.1f*11.0f, 1e-3f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_06_I_Only)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_06)
 {
 #ifdef UNIT_TEST
-    pid_set_gains(0.0f, 0.01f, 0.0f);
+    pid_set_gains(0.0f,0.01f,0.0f);
     g_pidIntegral = 0.0f;
 #endif
-    lane = makeLaneOut(0.0f, 1.0f);     // Error=1
-    float out1 = call(1.0f);            // 1st integration
-    float out2 = call(1.0f);            // 2nd → 더 커야 함
+    lane = makeLaneOut(0.0f, 1.0f);
+    float out1 = call(1.0f);
+    float out2 = call(1.0f);
     EXPECT_GT(out2, out1);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_07_D_Only)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_07)
 {
 #ifdef UNIT_TEST
-    pid_set_gains(0.0f, 0.0f, 0.005f);
+    pid_set_gains(0.0f,0.0f,0.005f);
     g_pidPrevError = 10.0f;
 #endif
-    lane = makeLaneOut(20.0f, 0.0f);    // Error=20
+    lane = makeLaneOut(20.0f, 0.0f);
     float out = call(1.0f);
     EXPECT_NEAR(out, 0.005f*10.0f, 1e-3f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_08_IntegralWindupClamp)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_08)
 {
 #ifdef UNIT_TEST
     g_pidIntegral = 1e6f;
@@ -441,88 +441,87 @@ TEST_F(LfaPidTest, TC_LFA_PID_RA_08_IntegralWindupClamp)
     EXPECT_NEAR(out, YAW_CLAMP, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_09_LargeHeadingIncreasesOutput)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_09)
 {
     lane = makeLaneOut(100.0f, 0.0f);
     float out = call(1.0f);
     EXPECT_GT(out, 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_10_LateralOffsetIncreasesOutput)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_10)
 {
     lane = makeLaneOut(0.0f, 2.0f);
     float out = call(1.0f);
     EXPECT_GT(out, 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_11_NullPtr_ReturnZero)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_11)
 {
     EXPECT_NEAR(calculate_steer_in_low_speed_pid(nullptr, 1.0f), 0.0f, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_12_ClampAlwaysApplied)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_12)
 {
     lane = makeLaneOut(1000.0f, 10.0f);
     float out = call(1.0f);
     EXPECT_LE(out, YAW_CLAMP);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_13_OutputAlwaysFinite)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_13)
 {
     lane = makeLaneOut(400.0f, 4.0f);
     float out = call(1.0f);
     EXPECT_TRUE(std::isfinite(out));
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_14_StateUpdateEveryCycle)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_14)
 {
     lane = makeLaneOut(10.0f, 1.0f);
     float first  = call(1.0f);
-    float second = call(1.0f);      // integral 증가로 두 번째가 커야
+    float second = call(1.0f);
     EXPECT_GT(std::fabs(second), std::fabs(first));
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_15_ErrorZero_OutputZero)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_15)
 {
     lane = makeLaneOut(0.0f, 0.0f);
     EXPECT_NEAR(call(1.0f), 0.0f, TOL);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_16_HeadingOnlyEffect)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_16)
 {
     lane = makeLaneOut(30.0f, 0.0f);
     float out = call(1.0f);
     EXPECT_GT(out, 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_17_OffsetOnlyEffect)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_17)
 {
     lane = makeLaneOut(0.0f, 1.0f);
     float out = call(1.0f);
     EXPECT_GT(out, 0.0f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_18_NoErrorChange_DerivativeZero)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_18)
 {
 #ifdef UNIT_TEST
     g_pidPrevError = 6.0f;
 #endif
-    lane = makeLaneOut(5.0f, 1.0f);   // Error =6 (same)
+    lane = makeLaneOut(5.0f, 1.0f);
     float out = call(1.0f);
-    /* dErr = 0 → 출력 ≈ P+I */
     float expectP = 0.1f*6.0f;
     EXPECT_NEAR(out, expectP, 0.2f);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_19_NoInitStateStillStable)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_19)
 {
     lane = makeLaneOut(10.0f, 1.0f);
-    call(1.0f);           // warm‑up
+    call(1.0f);
     float out = call(1.0f);
     EXPECT_LE(std::fabs(out), YAW_CLAMP);
 }
 
-TEST_F(LfaPidTest, TC_LFA_PID_RA_20_ExceptionValueHandled)
+TEST_F(LfaPidTest, TC_LFA_PID_RA_20)
 {
     lane = makeLaneOut(NAN, 1.0f);
     EXPECT_NEAR(call(1.0f), 0.0f, TOL);

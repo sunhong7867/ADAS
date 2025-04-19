@@ -16,8 +16,8 @@
  #include <cstring>
  #include <cmath>
  
- #include "lfa.h"            /* LFA_Mode_t, lfa_output_selection(...)             */
- #include "adas_shared.h"    /* Ego_Data_t, Lane_Data_LS_t, etc.               */
+ #include "lfa.h"            /* LFA_Mode_t, lfa_output_selection(...) */
+ #include "adas_shared.h"    /* Ego_Data_t, Lane_Data_LS_t */
  
  static constexpr float kEps = 1e-3f;
  
@@ -28,14 +28,14 @@
  {
  protected:
 	 /* 입력 */
-	 LFA_Mode_e           mode;
-	 float                steerPID;
-	 float                steerStanley;
-	 Lane_Data_LS_t   lane;
-	 Ego_Data_t            ego;
+	 LFA_Mode_e        mode;
+	 float             steerPID;
+	 float             steerStanley;
+	 Lane_Data_LS_t    lane;
+	 Ego_Data_t        ego;
  
 	 /* 출력 */
-	 float                steerOut;
+	 float             steerOut;
  
 	 void SetUp() override
 	 {
@@ -68,438 +68,399 @@
  };
  
  /*==========================================================================
-  *  EQ (Test Cases 01 ~ 20) ― 동등 분할
+  *  EQ (Test Cases 01 ~ 20)
   *==========================================================================*/
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_01_LowSpeedUsesPID)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_01)
  {
 	 mode         = LFA_MODE_LOW_SPEED;
 	 steerPID     = 50.0f;
 	 steerStanley = 100.0f;
- 
 	 EXPECT_NEAR(Call(), 50.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_02_HighSpeedUsesStanley)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_02)
  {
 	 mode         = LFA_MODE_HIGH_SPEED;
 	 steerPID     = 50.0f;
 	 steerStanley = 60.0f;
- 
 	 EXPECT_NEAR(Call(), 60.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_03_ChangingLaneAttenuation)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_03)
  {
 	 steerPID                   = 100.0f;
 	 lane.LS_Is_Changing_Lane   = true;
- 
 	 EXPECT_NEAR(Call(), 100.0f * 0.2f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_04_NoAttenuationWhenNotChanging)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_04)
  {
 	 steerPID                   = 80.0f;
 	 lane.LS_Is_Changing_Lane   = false;
- 
 	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_05_WithinLaneFalseAmplify)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_05)
  {
 	 steerPID                 = 40.0f;
 	 lane.LS_Is_Within_Lane   = false;
- 
 	 EXPECT_NEAR(Call(), 40.0f * 1.5f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_06_WithinLaneTrueNoAmplify)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_06)
  {
 	 steerStanley               = 70.0f;
 	 mode                       = LFA_MODE_HIGH_SPEED;
 	 lane.LS_Is_Within_Lane     = true;
- 
 	 EXPECT_NEAR(Call(), 70.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_07_CurvedLaneGain12)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_07)
  {
 	 steerPID                   = 80.0f;
 	 lane.LS_Is_Curved_Lane     = true;
-	 ego.Ego_Yaw_Rate           = 20.0f;   /* 제한 미충족 */
- 
+	 ego.Ego_Yaw_Rate           = 20.0f;
 	 EXPECT_NEAR(Call(), 80.0f * 1.2f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_08_NotCurvedGain1)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_08)
  {
 	 mode             = LFA_MODE_HIGH_SPEED;
 	 steerStanley     = 80.0f;
- 
 	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_09_CurvePlusHighYawRateGain08)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_09)
  {
 	 mode                       = LFA_MODE_HIGH_SPEED;
 	 steerStanley               = 100.0f;
 	 lane.LS_Is_Curved_Lane     = true;
-	 ego.Ego_Yaw_Rate           = 35.0f;   /* >30°/s */
- 
+	 ego.Ego_Yaw_Rate           = 35.0f;
 	 EXPECT_NEAR(Call(), 100.0f * 0.8f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_10_CurvePlusHighSteerAngleGain08)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_10)
  {
 	 mode                       = LFA_MODE_HIGH_SPEED;
 	 steerStanley               = 120.0f;
 	 lane.LS_Is_Curved_Lane     = true;
-	 ego.Ego_Steering_Angle     = 210.0f;  /* abs >200 */
- 
+	 ego.Ego_Steering_Angle     = 210.0f;
 	 EXPECT_NEAR(Call(), 120.0f * 0.8f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_11_OnlyChangeLaneRule)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_11)
  {
 	 steerPID                 = 100.0f;
 	 lane.LS_Is_Changing_Lane = true;
- 
 	 EXPECT_NEAR(Call(), 100.0f * 0.2f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_12_OnlyWithinLaneFalseRule)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_12)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Within_Lane = false;
- 
 	 EXPECT_NEAR(Call(), 100.0f * 1.5f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_13_OnlyCurvedGain12)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_13)
  {
 	 mode                     = LFA_MODE_HIGH_SPEED;
 	 steerStanley             = 100.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Yaw_Rate         = 20.0f;
- 
 	 EXPECT_NEAR(Call(), 100.0f * 1.2f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_14_YawRateOverLimitGain08)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_14)
  {
 	 mode                     = LFA_MODE_HIGH_SPEED;
 	 steerStanley             = 100.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Yaw_Rate         = 35.0f;
- 
 	 EXPECT_NEAR(Call(), 100.0f * 0.8f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_15_SteerAngleOverLimitGain08)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_15)
  {
 	 mode                     = LFA_MODE_HIGH_SPEED;
 	 steerStanley             = 100.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Steering_Angle   = -210.0f;
- 
 	 EXPECT_NEAR(Call(), 100.0f * 0.8f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_16_AllRulesSequential)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_16)
  {
 	 steerPID                 = 100.0f;
-	 lane.LS_Is_Changing_Lane = true;      /* ×0.2 → 20 */
-	 lane.LS_Is_Within_Lane   = false;     /* ×1.5 → 30 */
+	 lane.LS_Is_Changing_Lane = true;      /* ×0.2 → 20 */
+	 lane.LS_Is_Within_Lane   = false;     /* ×1.5 → 30 */
 	 lane.LS_Is_Curved_Lane   = true;
-	 ego.Ego_Yaw_Rate         = 35.0f;     /* gain 0.8 → 24 */
- 
+	 ego.Ego_Yaw_Rate         = 35.0f;     /* gain 0.8 → 24 */
 	 EXPECT_NEAR(Call(), 24.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_17_PositiveClamp)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_17)
  {
 	 mode             = LFA_MODE_HIGH_SPEED;
-	 steerStanley     = 600.0f;      /* >540 */
- 
+	 steerStanley     = 600.0f;
 	 EXPECT_NEAR(Call(), 540.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_18_NegativeClamp)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_18)
  {
 	 mode             = LFA_MODE_HIGH_SPEED;
 	 steerStanley     = -600.0f;
- 
 	 EXPECT_NEAR(Call(), -540.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_19_NoRuleApplied)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_19)
  {
 	 steerPID = 100.0f;
- 
 	 EXPECT_NEAR(Call(), 100.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_20_AllZeroSafeOutputZero)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_EQ_20)
  {
 	 EXPECT_NEAR(Call(), 0.0f, kEps);
  }
  
  /*==========================================================================
-  *  BV (Test Cases 21 ~ 40) ― 경계값
+  *  BV (Test Cases 21 ~ 40)
   *==========================================================================*/
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_01_ClampHighEdge5399)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_01)
  {
 	 steerPID = 539.9f;
 	 EXPECT_NEAR(Call(), 539.9f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_02_ClampHighEdge5401)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_02)
  {
 	 steerPID = 540.1f;
 	 EXPECT_NEAR(Call(), 540.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_03_ClampLowEdgeMinus5401)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_03)
  {
 	 steerStanley = -540.1f;
 	 mode         = LFA_MODE_HIGH_SPEED;
 	 EXPECT_NEAR(Call(), -540.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_04_ZeroSteerNoRules)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_04)
  {
 	 steerPID = 0.0f;
 	 EXPECT_NEAR(Call(), 0.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_05_WithinLaneTrueNoAmplifyBoundary)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_05)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Within_Lane = true;
 	 EXPECT_NEAR(Call(), 100.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_06_WithinLaneFalseAmplifyBoundary)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_06)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Within_Lane = false;
 	 EXPECT_NEAR(Call(), 150.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_07_Heading180NoRules)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_07)
  {
 	 steerPID = 180.0f;
 	 EXPECT_NEAR(Call(), 180.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_08_YawRate29_9_NoAttenuate)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_08)
  {
 	 mode                     = LFA_MODE_HIGH_SPEED;
 	 steerStanley             = 100.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Yaw_Rate         = 29.9f;
- 
-	 EXPECT_NEAR(Call(), 120.0f, kEps);      /* ×1.2 */
+	 EXPECT_NEAR(Call(), 120.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_09_YawRate30_Attenuate)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_09)
  {
 	 mode                     = LFA_MODE_HIGH_SPEED;
 	 steerStanley             = 100.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Yaw_Rate         = 30.0f;
- 
-	 EXPECT_NEAR(Call(), 80.0f, kEps);       /* ×0.8 */
+	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_10_SteerAngle199_9_NoAttenuate)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_10)
  {
 	 steerPID                 = 100.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Steering_Angle   = 199.9f;
- 
 	 EXPECT_NEAR(Call(), 120.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_11_SteerAngle200_Attenuate)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_11)
  {
 	 steerPID                 = 100.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Steering_Angle   = 200.0f;
- 
 	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_12_CurveGainUpperBound12)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_12)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Curved_Lane = true;
- 
 	 EXPECT_NEAR(Call(), 120.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_13_CurveGainLowerBound08)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_13)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Curved_Lane = true;
 	 ego.Ego_Yaw_Rate       = 31.0f;
- 
 	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_14_ChangingLaneSmallSteer)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_14)
  {
 	 steerPID                 = 1.0f;
 	 lane.LS_Is_Changing_Lane = true;
- 
 	 EXPECT_NEAR(Call(), 0.2f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_15_WithinLaneFalseSmallSteer)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_15)
  {
 	 steerPID               = 1.0f;
 	 lane.LS_Is_Within_Lane = false;
- 
 	 EXPECT_NEAR(Call(), 1.5f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_16_CurvedLaneSmallSteerGain12)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_16)
  {
 	 mode                     = LFA_MODE_HIGH_SPEED;
 	 steerStanley             = 1.0f;
 	 lane.LS_Is_Curved_Lane   = true;
- 
 	 EXPECT_NEAR(Call(), 1.2f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_17_CurvedLaneSmallSteerGain08)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_17)
  {
 	 mode                     = LFA_MODE_HIGH_SPEED;
 	 steerStanley             = 1.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Steering_Angle   = 210.0f;
- 
 	 EXPECT_NEAR(Call(), 0.8f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_18_AllRulesSmallSteer)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_18)
  {
 	 steerPID                 = 1.0f;
-	 lane.LS_Is_Changing_Lane = true;   /* ×0.2 →0.2 */
-	 lane.LS_Is_Within_Lane   = false;  /* ×1.5 →0.3 */
+	 lane.LS_Is_Changing_Lane = true;   /* ×0.2 → 0.2 */
+	 lane.LS_Is_Within_Lane   = false;  /* ×1.5 → 0.3 */
 	 lane.LS_Is_Curved_Lane   = true;
-	 ego.Ego_Yaw_Rate         = 35.0f;  /* ×0.8 →0.24 */
- 
+	 ego.Ego_Yaw_Rate         = 35.0f;  /* ×0.8 → 0.24 */
 	 EXPECT_NEAR(Call(), 0.24f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_19_Input1000Clamp)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_19)
  {
 	 steerPID = 1000.0f;
 	 EXPECT_NEAR(Call(), 540.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_20_InputMinus1000Clamp)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_BV_20)
  {
 	 steerPID = -1000.0f;
 	 EXPECT_NEAR(Call(), -540.0f, kEps);
  }
  
  /*==========================================================================
-  *  RA (Test Cases 41 ~ 60) ― 요구사항 기반
+  *  RA (Test Cases 41 ~ 60)
   *==========================================================================*/
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_01_LowSpeedSelectPID)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_01)
  {
 	 mode      = LFA_MODE_LOW_SPEED;
 	 steerPID  = 80.0f;
 	 steerStanley = 120.0f;
- 
 	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_02_HighSpeedSelectStanley)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_02)
  {
 	 mode         = LFA_MODE_HIGH_SPEED;
 	 steerPID     = 80.0f;
 	 steerStanley = 100.0f;
- 
 	 EXPECT_NEAR(Call(), 100.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_03_ChangingLane20Percent)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_03)
  {
 	 steerPID                 = 100.0f;
 	 lane.LS_Is_Changing_Lane = true;
- 
 	 EXPECT_NEAR(Call(), 20.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_04_WithinLaneTrueNoAmplify)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_04)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Within_Lane = true;
- 
 	 EXPECT_NEAR(Call(), 100.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_05_WithinLaneFalseAmplify)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_05)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Within_Lane = false;
- 
 	 EXPECT_NEAR(Call(), 150.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_06_CurvedGain12)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_06)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Curved_Lane = true;
- 
 	 EXPECT_NEAR(Call(), 120.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_07_CurvedGain08ByYawRate)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_07)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Curved_Lane = true;
 	 ego.Ego_Yaw_Rate       = 35.0f;
- 
 	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_08_CurvedGain08BySteerAngle)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_08)
  {
 	 steerPID                 = 100.0f;
 	 lane.LS_Is_Curved_Lane   = true;
 	 ego.Ego_Steering_Angle   = 210.0f;
- 
 	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_09_AllRulesSequenceCheck)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_09)
  {
 	 steerPID                 = 100.0f;
 	 lane.LS_Is_Changing_Lane = true;     // ×0.2  =20
 	 lane.LS_Is_Within_Lane   = false;    // ×1.5  =30
 	 lane.LS_Is_Curved_Lane   = true;     // ×1.2  =36 (yaw <30, steer <200)
 	 ego.Ego_Yaw_Rate         = 25.0f;
- 
 	 EXPECT_NEAR(Call(), 36.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_10_FinalClampAlways)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_10)
  {
 	 steerPID = 700.0f;
 	 EXPECT_NEAR(Call(), 540.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_11_BothInputsZero)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_11)
  {
 	 steerPID     = 0.0f;
 	 steerStanley = 0.0f;
 	 EXPECT_NEAR(Call(), 0.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_12_ChangePlusCurvePlusExitLane)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_12)
  {
 	 mode                         = LFA_MODE_HIGH_SPEED;
 	 steerStanley                 = 100.0f;
@@ -507,27 +468,25 @@
 	 lane.LS_Is_Within_Lane       = false;  // ×1.5 =30
 	 lane.LS_Is_Curved_Lane       = true;
 	 ego.Ego_Yaw_Rate             = 35.0f;  // ×0.8 =24
- 
 	 EXPECT_NEAR(Call(), 24.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_13_ClampExact540)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_13)
  {
 	 steerPID = 600.0f;
 	 EXPECT_NEAR(Call(), 540.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_14_CurveOvershootStillBelowClamp)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_14)
  {
 	 mode                     = LFA_MODE_HIGH_SPEED;
 	 steerStanley             = 200.0f;
 	 lane.LS_Is_Curved_Lane   = true;
-	 ego.Ego_Yaw_Rate         = 25.0f;   /* gain 1.2 => 240 */
- 
+	 ego.Ego_Yaw_Rate         = 25.0f;   /* gain 1.2 => 240 */
 	 EXPECT_NEAR(Call(), 240.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_15_CorrectionSequenceOrder)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_15)
  {
 	 steerPID                 = 100.0f;
 	 lane.LS_Is_Changing_Lane = true;   // ×0.2 =20
@@ -536,7 +495,7 @@
 	 EXPECT_NEAR(Call(), 36.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_16_CurveGain08ConditionMet)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_16)
  {
 	 steerPID               = 100.0f;
 	 lane.LS_Is_Curved_Lane = true;
@@ -544,7 +503,7 @@
 	 EXPECT_NEAR(Call(), 80.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_17_GainOrderConflictCheck)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_17)
  {
 	 steerPID                 = 100.0f;
 	 lane.LS_Is_Changing_Lane = true;   // ×0.2
@@ -554,36 +513,35 @@
 	 EXPECT_NEAR(Call(), 24.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_18_NullLanePointerSafeZero)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_18)
  {
-	 /* API 호출 시 NULL 전달 케이스 를 별도 함수 랩퍼 로 검증 */
 	 float out =
 		 lfa_output_selection(LFA_MODE_LOW_SPEED, 100.0f, 50.0f,
-							  /* NULL */ nullptr,
+							  nullptr,
 							  &ego);
 	 EXPECT_NEAR(out, 0.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_19_CurveGainVariants)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_19)
  {
-	 /* (a) gain 1.2 */
+	 /* (a) gain 1.2 */
 	 steerPID               = 50.0f;
 	 lane.LS_Is_Curved_Lane = true;
 	 ego.Ego_Yaw_Rate       = 20.0f;
-	 float out12 = Call();          /* 50×1.2 = 60 */
+	 float out12 = Call();  /* 50 × 1.2 = 60 */
  
-	 /* (b) gain 0.8 */
-	 SetUp();                       /* fixture reset */
+	 /* (b) gain 0.8 */
+	 SetUp();               /* fixture reset */
 	 steerPID               = 50.0f;
 	 lane.LS_Is_Curved_Lane = true;
 	 ego.Ego_Yaw_Rate       = 35.0f;
-	 float out08 = Call();          /* 50×0.8 = 40 */
+	 float out08 = Call();  /* 50 × 0.8 = 40 */
  
 	 EXPECT_NEAR(out12, 60.0f, kEps);
 	 EXPECT_NEAR(out08, 40.0f, kEps);
  }
  
- TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_20_AllFalseRulesOriginalOut)
+ TEST_F(LfaOutputSelectionTest, TC_LFA_OUT_RA_20)
  {
 	 steerPID = 100.0f;
 	 EXPECT_NEAR(Call(), 100.0f, kEps);

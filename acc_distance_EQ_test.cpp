@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 #include <cstring>
 #include <cmath>
+#include "adas_shared.h"     // 공통 구조체·상수
 #include "acc.h"  // calculate_accel_for_distance_pid(...) 선언 및 필요한 구조체, enums
 
 // 외부(또는 static) 변수들이 acc.c 등 내부에 있을 수 있음.

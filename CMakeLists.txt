@@ -18,27 +18,42 @@ enable_testing()
 add_library(adas
     #ego_vehicle_estimation.c
 	#lane_selection.c
-	target_selection.c
-
-    # 추가 ADAS 관련 C 소스 파일이 있다면 여기에 나열하세요.
+	#target_selection.c
+	acc.c
+	#aeb.c
+	#lfa.c
+	#arbitration.c
 )
 
 # 테스트 실행 파일 추가
 add_executable(adas_unit_tests 
-    #ego_vehicle_estimation_test_EQ.cpp
-	#ego_vehicle_estimation_test_RA.cpp
-	#ego_vehicle_estimation_test_BV.cpp
-	#lane_selection_test.cpp
-	#target_selection_test_ST.cpp
-	#target_selection_test_FP.cpp
-	#target_selection_test_SA.cpp
-	#acc_test_MS.cpp
-	#acc_test_AD_EQ.cpp
-	#acc_test_AD_BV.cpp
-	#acc_test_AD_RA.cpp
+    #ego_vehicle_estimation_EQ_test.cpp
+	#ego_vehicle_estimation_BV_test.cpp
+	#ego_vehicle_estimation_RA_test.cpp
 	
+	#lane_selection_test.cpp
 
-	# 추가 ADAS 관련 테스트 C++ 소스 파일이 있다면 여기에 나열하세요.
+	#target_selection_object_test.cpp
+	#target_selection_select_test.cpp
+	#target_selection_path_test.cpp
+	
+	#acc_mode_test.cpp
+	acc_distance_EQ_test.cpp
+	#acc_distance_BV_test.cpp
+	#acc_distance_RA_test.cpp
+	#acc_speed_pid_test.cpp
+	#acc_out_test.cpp
+
+	#aeb_decel_test.cpp
+	#aeb_mode_test.cpp
+	#aeb_ttc_test.cpp
+
+	#lfa_mode_test.cpp
+	#lfa_output_test.cpp
+	#lfa_PID_test.cpp
+	#lfa_stanley_test.cpp
+
+	#arbitration_test.cpp
 )
 target_link_libraries(adas_unit_tests PRIVATE adas gtest gtest_main)
 

@@ -206,11 +206,6 @@ typedef struct {
  * 5) ACC/AEB 모드
  *============================================================*/
 /* 설계 코드에서 ACC는 'ACC_Mode_e'라 명명하므로 통일 */
-typedef enum {
-    ACC_MODE_SPEED = 0,
-    ACC_MODE_DISTANCE,
-    ACC_MODE_STOP
-} ACC_Mode_e;
 
 #define MAX_ACCEL  10.0f
 #define MIN_ACCEL -10.0f

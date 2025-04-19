@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-target_selection.obj: target_selection.c.obj
-.PHONY : target_selection.obj
+acc.obj: acc.c.obj
+.PHONY : acc.obj
 
 # target to build an object file
-target_selection.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.obj
-.PHONY : target_selection.c.obj
+acc.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.obj
+.PHONY : acc.c.obj
 
-target_selection.i: target_selection.c.i
-.PHONY : target_selection.i
+acc.i: acc.c.i
+.PHONY : acc.i
 
 # target to preprocess a source file
-target_selection.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.i
-.PHONY : target_selection.c.i
+acc.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.i
+.PHONY : acc.c.i
 
-target_selection.s: target_selection.c.s
-.PHONY : target_selection.s
+acc.s: acc.c.s
+.PHONY : acc.s
 
 # target to generate assembly for a file
-target_selection.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.s
-.PHONY : target_selection.c.s
+acc.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.s
+.PHONY : acc.c.s
 
-target_selection_test_ST.obj: target_selection_test_ST.cpp.obj
-.PHONY : target_selection_test_ST.obj
+acc_distance_EQ_test.obj: acc_distance_EQ_test.cpp.obj
+.PHONY : acc_distance_EQ_test.obj
 
 # target to build an object file
-target_selection_test_ST.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.obj
-.PHONY : target_selection_test_ST.cpp.obj
+acc_distance_EQ_test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/acc_distance_EQ_test.cpp.obj
+.PHONY : acc_distance_EQ_test.cpp.obj
 
-target_selection_test_ST.i: target_selection_test_ST.cpp.i
-.PHONY : target_selection_test_ST.i
+acc_distance_EQ_test.i: acc_distance_EQ_test.cpp.i
+.PHONY : acc_distance_EQ_test.i
 
 # target to preprocess a source file
-target_selection_test_ST.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.i
-.PHONY : target_selection_test_ST.cpp.i
+acc_distance_EQ_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/acc_distance_EQ_test.cpp.i
+.PHONY : acc_distance_EQ_test.cpp.i
 
-target_selection_test_ST.s: target_selection_test_ST.cpp.s
-.PHONY : target_selection_test_ST.s
+acc_distance_EQ_test.s: acc_distance_EQ_test.cpp.s
+.PHONY : acc_distance_EQ_test.s
 
 # target to generate assembly for a file
-target_selection_test_ST.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/target_selection_test_ST.cpp.s
-.PHONY : target_selection_test_ST.cpp.s
+acc_distance_EQ_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/acc_distance_EQ_test.cpp.s
+.PHONY : acc_distance_EQ_test.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... target_selection.obj
-	@echo ... target_selection.i
-	@echo ... target_selection.s
-	@echo ... target_selection_test_ST.obj
-	@echo ... target_selection_test_ST.i
-	@echo ... target_selection_test_ST.s
+	@echo ... acc.obj
+	@echo ... acc.i
+	@echo ... acc.s
+	@echo ... acc_distance_EQ_test.obj
+	@echo ... acc_distance_EQ_test.i
+	@echo ... acc_distance_EQ_test.s
 .PHONY : help
 
 

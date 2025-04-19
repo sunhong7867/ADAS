@@ -3,15 +3,15 @@
 #include "acc.h"
 
 /* Distance PID 적분, 과거오차 저장 */
-static float s_distIntegral  = 0.0f;
-static float s_distPrevError = 0.0f;
+float s_distIntegral  = 0.0f;
+float s_distPrevError = 0.0f;
 
 /* Speed PID 적분, 과거오차 저장 */
-static float s_speedIntegral  = 0.0f;
-static float s_speedPrevError = 0.0f;
+float s_speedIntegral  = 0.0f;
+float s_speedPrevError = 0.0f;
 
 /* 이전 시간 저장(예: 거리 PID에서 Delta Time 계산용) */
-static float s_prevTimeDistance = 0.0f;
+float s_prevTimeDistance = 0.0f;
 
 /**
  * @brief 2.2.4.1.1 ACC 모드 결정

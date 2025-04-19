@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cfloat>
 #include "aeb.h"              // Unit‑Under‑Test
+#include "adas_shared.h"
 
 constexpr float EPS_F   = 1e-4f;
 constexpr float INF_TTC = 99999.0f;

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.obj"
-  "CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.obj.d"
+  "CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.obj"
+  "CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.obj.d"
   "adas_unit_tests.exe"
   "adas_unit_tests.exe.manifest"
   "adas_unit_tests.pdb"

@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Projects/GoogleTestProject/arbitration_test.cpp" "CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.obj" "gcc" "CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.obj.d"
+  "C:/Projects/GoogleTestProject/aeb_ttc_test.cpp" "CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.obj" "gcc" "CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

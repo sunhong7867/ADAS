@@ -20,9 +20,9 @@ add_library(adas
 	#lane_selection.c
 	#target_selection.c
 	#acc.c
-	#aeb.c
+	aeb.c
 	#lfa.c
-	arbitration.c
+	#arbitration.c
 )
 
 # 테스트 실행 파일 추가
@@ -34,8 +34,8 @@ add_executable(adas_unit_tests
 	#lane_selection_test.cpp
 
 	#target_selection_object_test.cpp
-	#target_selection_select_test.cpp
 	#target_selection_path_test.cpp
+	#target_selection_select_test.cpp
 	
 	#acc_mode_test.cpp
 	#acc_distance_EQ_test.cpp
@@ -44,7 +44,7 @@ add_executable(adas_unit_tests
 	#acc_speed_pid_test.cpp
 	#acc_out_test.cpp
 
-	#aeb_ttc_test.cpp
+	aeb_ttc_test.cpp
 	#aeb_mode_test.cpp
 	#aeb_decel_test.cpp
 
@@ -53,7 +53,7 @@ add_executable(adas_unit_tests
 	#lfa_stanley_test.cpp
 	#lfa_output_test.cpp
 
-	arbitration_test.cpp
+	#arbitration_test.cpp
 )
 target_link_libraries(adas_unit_tests PRIVATE adas gtest gtest_main)
 

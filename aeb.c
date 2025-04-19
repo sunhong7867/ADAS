@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "aeb.h"
+#include "adas_shared.h"
 
 /**
  * @brief 2.2.3.1.1 calculate_ttc_for_aeb

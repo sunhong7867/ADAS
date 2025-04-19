@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cfloat>
 #include "aeb.h"            // Unit‑Under‑Test
+#include "adas_shared.h"
 
 /* 내부 ‘∞’ 표현 값 ‑ DUT 와 동일해야 함 */
 constexpr float INF_TTC  = 99999.0f;

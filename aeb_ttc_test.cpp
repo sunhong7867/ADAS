@@ -9,6 +9,8 @@
 #include <cmath>
 #include <cfloat>
 #include "aeb.h"                // Unit‑Under‑Test
+#include "adas_shared.h"
+
 
 /* ---------- 사내 공통 상수 (DUT 와 반드시 동일) ------------------- */
 constexpr float INF_TTC      = 99999.0f;   // “무한대” 내부표기

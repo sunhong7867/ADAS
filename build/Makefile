@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-arbitration.obj: arbitration.c.obj
-.PHONY : arbitration.obj
+aeb.obj: aeb.c.obj
+.PHONY : aeb.obj
 
 # target to build an object file
-arbitration.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/arbitration.c.obj
-.PHONY : arbitration.c.obj
+aeb.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.obj
+.PHONY : aeb.c.obj
 
-arbitration.i: arbitration.c.i
-.PHONY : arbitration.i
+aeb.i: aeb.c.i
+.PHONY : aeb.i
 
 # target to preprocess a source file
-arbitration.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/arbitration.c.i
-.PHONY : arbitration.c.i
+aeb.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.i
+.PHONY : aeb.c.i
 
-arbitration.s: arbitration.c.s
-.PHONY : arbitration.s
+aeb.s: aeb.c.s
+.PHONY : aeb.s
 
 # target to generate assembly for a file
-arbitration.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/arbitration.c.s
-.PHONY : arbitration.c.s
+aeb.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.s
+.PHONY : aeb.c.s
 
-arbitration_test.obj: arbitration_test.cpp.obj
-.PHONY : arbitration_test.obj
+aeb_ttc_test.obj: aeb_ttc_test.cpp.obj
+.PHONY : aeb_ttc_test.obj
 
 # target to build an object file
-arbitration_test.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.obj
-.PHONY : arbitration_test.cpp.obj
+aeb_ttc_test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.obj
+.PHONY : aeb_ttc_test.cpp.obj
 
-arbitration_test.i: arbitration_test.cpp.i
-.PHONY : arbitration_test.i
+aeb_ttc_test.i: aeb_ttc_test.cpp.i
+.PHONY : aeb_ttc_test.i
 
 # target to preprocess a source file
-arbitration_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.i
-.PHONY : arbitration_test.cpp.i
+aeb_ttc_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.i
+.PHONY : aeb_ttc_test.cpp.i
 
-arbitration_test.s: arbitration_test.cpp.s
-.PHONY : arbitration_test.s
+aeb_ttc_test.s: aeb_ttc_test.cpp.s
+.PHONY : aeb_ttc_test.s
 
 # target to generate assembly for a file
-arbitration_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.s
-.PHONY : arbitration_test.cpp.s
+aeb_ttc_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/aeb_ttc_test.cpp.s
+.PHONY : aeb_ttc_test.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... arbitration.obj
-	@echo ... arbitration.i
-	@echo ... arbitration.s
-	@echo ... arbitration_test.obj
-	@echo ... arbitration_test.i
-	@echo ... arbitration_test.s
+	@echo ... aeb.obj
+	@echo ... aeb.i
+	@echo ... aeb.s
+	@echo ... aeb_ttc_test.obj
+	@echo ... aeb_ttc_test.i
+	@echo ... aeb_ttc_test.s
 .PHONY : help
 
 

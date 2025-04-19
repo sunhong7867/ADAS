@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-lfa.obj: lfa.c.obj
-.PHONY : lfa.obj
+arbitration.obj: arbitration.c.obj
+.PHONY : arbitration.obj
 
 # target to build an object file
-lfa.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.obj
-.PHONY : lfa.c.obj
+arbitration.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/arbitration.c.obj
+.PHONY : arbitration.c.obj
 
-lfa.i: lfa.c.i
-.PHONY : lfa.i
+arbitration.i: arbitration.c.i
+.PHONY : arbitration.i
 
 # target to preprocess a source file
-lfa.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.i
-.PHONY : lfa.c.i
+arbitration.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/arbitration.c.i
+.PHONY : arbitration.c.i
 
-lfa.s: lfa.c.s
-.PHONY : lfa.s
+arbitration.s: arbitration.c.s
+.PHONY : arbitration.s
 
 # target to generate assembly for a file
-lfa.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.s
-.PHONY : lfa.c.s
+arbitration.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/arbitration.c.s
+.PHONY : arbitration.c.s
 
-lfa_pid_test.obj: lfa_pid_test.cpp.obj
-.PHONY : lfa_pid_test.obj
+arbitration_test.obj: arbitration_test.cpp.obj
+.PHONY : arbitration_test.obj
 
 # target to build an object file
-lfa_pid_test.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_pid_test.cpp.obj
-.PHONY : lfa_pid_test.cpp.obj
+arbitration_test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.obj
+.PHONY : arbitration_test.cpp.obj
 
-lfa_pid_test.i: lfa_pid_test.cpp.i
-.PHONY : lfa_pid_test.i
+arbitration_test.i: arbitration_test.cpp.i
+.PHONY : arbitration_test.i
 
 # target to preprocess a source file
-lfa_pid_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_pid_test.cpp.i
-.PHONY : lfa_pid_test.cpp.i
+arbitration_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.i
+.PHONY : arbitration_test.cpp.i
 
-lfa_pid_test.s: lfa_pid_test.cpp.s
-.PHONY : lfa_pid_test.s
+arbitration_test.s: arbitration_test.cpp.s
+.PHONY : arbitration_test.s
 
 # target to generate assembly for a file
-lfa_pid_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_pid_test.cpp.s
-.PHONY : lfa_pid_test.cpp.s
+arbitration_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/arbitration_test.cpp.s
+.PHONY : arbitration_test.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... lfa.obj
-	@echo ... lfa.i
-	@echo ... lfa.s
-	@echo ... lfa_pid_test.obj
-	@echo ... lfa_pid_test.i
-	@echo ... lfa_pid_test.s
+	@echo ... arbitration.obj
+	@echo ... arbitration.i
+	@echo ... arbitration.s
+	@echo ... arbitration_test.obj
+	@echo ... arbitration_test.i
+	@echo ... arbitration_test.s
 .PHONY : help
 
 

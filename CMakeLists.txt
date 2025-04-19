@@ -21,8 +21,8 @@ add_library(adas
 	#target_selection.c
 	#acc.c
 	#aeb.c
-	lfa.c
-	#arbitration.c
+	#lfa.c
+	arbitration.c
 )
 
 # 테스트 실행 파일 추가
@@ -49,11 +49,11 @@ add_executable(adas_unit_tests
 	#aeb_decel_test.cpp
 
 	#lfa_mode_test.cpp
-	lfa_pid_test.cpp
+	#lfa_pid_test.cpp
 	#lfa_stanley_test.cpp
 	#lfa_output_test.cpp
 
-	#arbitration_test.cpp
+	arbitration_test.cpp
 )
 target_link_libraries(adas_unit_tests PRIVATE adas gtest gtest_main)
 

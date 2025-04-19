@@ -71,28 +71,28 @@ include CMakeFiles/adas.dir/flags.make
 CMakeFiles/adas.dir/codegen:
 .PHONY : CMakeFiles/adas.dir/codegen
 
-CMakeFiles/adas.dir/lfa.c.obj: CMakeFiles/adas.dir/flags.make
-CMakeFiles/adas.dir/lfa.c.obj: C:/Projects/GoogleTestProject/lfa.c
-CMakeFiles/adas.dir/lfa.c.obj: CMakeFiles/adas.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Projects\GoogleTestProject\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/adas.dir/lfa.c.obj"
-	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/adas.dir/lfa.c.obj -MF CMakeFiles\adas.dir\lfa.c.obj.d -o CMakeFiles\adas.dir\lfa.c.obj -c C:\Projects\GoogleTestProject\lfa.c
+CMakeFiles/adas.dir/arbitration.c.obj: CMakeFiles/adas.dir/flags.make
+CMakeFiles/adas.dir/arbitration.c.obj: C:/Projects/GoogleTestProject/arbitration.c
+CMakeFiles/adas.dir/arbitration.c.obj: CMakeFiles/adas.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Projects\GoogleTestProject\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/adas.dir/arbitration.c.obj"
+	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/adas.dir/arbitration.c.obj -MF CMakeFiles\adas.dir\arbitration.c.obj.d -o CMakeFiles\adas.dir\arbitration.c.obj -c C:\Projects\GoogleTestProject\arbitration.c
 
-CMakeFiles/adas.dir/lfa.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/adas.dir/lfa.c.i"
-	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Projects\GoogleTestProject\lfa.c > CMakeFiles\adas.dir\lfa.c.i
+CMakeFiles/adas.dir/arbitration.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/adas.dir/arbitration.c.i"
+	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Projects\GoogleTestProject\arbitration.c > CMakeFiles\adas.dir\arbitration.c.i
 
-CMakeFiles/adas.dir/lfa.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/adas.dir/lfa.c.s"
-	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Projects\GoogleTestProject\lfa.c -o CMakeFiles\adas.dir\lfa.c.s
+CMakeFiles/adas.dir/arbitration.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/adas.dir/arbitration.c.s"
+	C:\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Projects\GoogleTestProject\arbitration.c -o CMakeFiles\adas.dir\arbitration.c.s
 
 # Object files for target adas
 adas_OBJECTS = \
-"CMakeFiles/adas.dir/lfa.c.obj"
+"CMakeFiles/adas.dir/arbitration.c.obj"
 
 # External object files for target adas
 adas_EXTERNAL_OBJECTS =
 
-libadas.a: CMakeFiles/adas.dir/lfa.c.obj
+libadas.a: CMakeFiles/adas.dir/arbitration.c.obj
 libadas.a: CMakeFiles/adas.dir/build.make
 libadas.a: CMakeFiles/adas.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Projects\GoogleTestProject\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C static library libadas.a"

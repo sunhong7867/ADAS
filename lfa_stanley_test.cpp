@@ -14,7 +14,7 @@
 #include <cstring>
 
 #include "lfa.h"              // calculate_steer_in_high_speed_stanley()
-#include "lane_selection.h"   // LaneSelectOutput_t
+#include "lane_selection.h"   // Lane_Data_LS_t
 #include "adas_shared.h"      // EgoData_t
 
 #ifdef UNIT_TEST
@@ -23,17 +23,17 @@ extern float g_stanleyGain;                    // lfa.c 에 정의된 Stanley ga
 #endif
 
 /*──────────────────────────────────────────────────────────────────*/
-static LaneSelectOutput_t makeLaneOut(float headingDeg, float offsetM)
+static Lane_Data_LS_t makeLaneOut(float headingDeg, float offsetM)
 {
-    LaneSelectOutput_t o{}; std::memset(&o, 0, sizeof(o));
+    Lane_Data_LS_t o{}; std::memset(&o, 0, sizeof(o));
     o.LS_Heading_Error = headingDeg;
     o.LS_Lane_Offset   = offsetM;
     return o;
 }
 
-static EgoData_t makeEgo(float vel)
+static Ego_Data_t makeEgo(float vel)
 {
-    EgoData_t e{}; std::memset(&e, 0, sizeof(e));
+    Ego_Data_t e{}; std::memset(&e, 0, sizeof(e));
     e.Ego_Velocity_X = vel;
     return e;
 }
@@ -46,8 +46,8 @@ static constexpr float MIN_VEL   = 0.1f;       // 내부 최소 속도 클램프
 class StanleyTest : public ::testing::Test
 {
 protected:
-    LaneSelectOutput_t lane;
-    EgoData_t          ego;
+    Lane_Data_LS_t lane;
+    Ego_Data_t          ego;
 
     void SetUp() override {
         lane = makeLaneOut(0.0f, 0.0f);
@@ -57,7 +57,7 @@ protected:
 #endif
     }
     float call() {
-        return calculate_steer_in_high_speed_stanley(&lane, &ego);
+        return calculate_steer_in_high_speed_stanley(&ego, &lane);
     }
 };
 
@@ -135,12 +135,12 @@ TEST_F(StanleyTest, TC_LFA_STAN_EQ_13_Output5401_Clamp) {
 }
 
 TEST_F(StanleyTest, TC_LFA_STAN_EQ_14_NullPtr_ReturnZero) {
-    EXPECT_NEAR(calculate_steer_in_high_speed_stanley(nullptr,&ego),0.0f,TOL);
+    EXPECT_NEAR(calculate_steer_in_high_speed_stanley(nullptr, &lane), 0.0f, TOL);
 }
 
 TEST_F(StanleyTest, TC_LFA_STAN_EQ_15_UninitMembers_Fallback) {
-    LaneSelectOutput_t dummy; // 미초기화
-    EXPECT_NEAR(calculate_steer_in_high_speed_stanley(&dummy,&ego),0.0f,1.0f);
+    Lane_Data_LS_t dummy; // 미초기화
+    EXPECT_NEAR(calculate_steer_in_high_speed_stanley(&ego, &dummy), 0.0f, 1.0f);
 }
 
 TEST_F(StanleyTest, TC_LFA_STAN_EQ_16_OffsetZeroHighVel) {
@@ -349,7 +349,7 @@ TEST_F(StanleyTest, TC_LFA_STAN_RA_07_HighSpeed_Decrease) {
 }
 
 TEST_F(StanleyTest, TC_LFA_STAN_RA_08_NullPtrSafe) {
-    EXPECT_NEAR(calculate_steer_in_high_speed_stanley(&lane,nullptr),0.0f,TOL);
+    EXPECT_NEAR(calculate_steer_in_high_speed_stanley(&ego, nullptr), 0.0f, TOL);
 }
 
 TEST_F(StanleyTest, TC_LFA_STAN_RA_09_OffsetNaN_Safe) {

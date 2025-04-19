@@ -1,2 +1,2 @@
-C:\mingw64\bin\ar.exe qc libadas.a CMakeFiles/adas.dir/lfa.c.obj
+C:\mingw64\bin\ar.exe qc libadas.a CMakeFiles/adas.dir/arbitration.c.obj
 C:\mingw64\bin\ranlib.exe libadas.a

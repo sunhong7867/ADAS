@@ -8,8 +8,8 @@
  *  - 테스트 대상  : float lfa_output_selection( LFA_Mode_t       mode,
  *                                             float            steerPID,
  *                                             float            steerStanley,
- *                                             const LaneSelectOutput_t* pLane,
- *                                             const EgoData_t*         pEgo );
+ *                                             const Lane_Data_LS_t* pLane,
+ *                                             const Ego_Data_t*         pEgo );
  ******************************************************************************/
 
  #include <gtest/gtest.h>
@@ -17,7 +17,7 @@
  #include <cmath>
  
  #include "lfa.h"            /* LFA_Mode_t, lfa_output_selection(...)             */
- #include "adas_shared.h"    /* EgoData_t, LaneSelectOutput_t, etc.               */
+ #include "adas_shared.h"    /* Ego_Data_t, Lane_Data_LS_t, etc.               */
  
  static constexpr float kEps = 1e-3f;
  
@@ -28,11 +28,11 @@
  {
  protected:
 	 /* 입력 */
-	 LFA_Mode_t           mode;
+	 LFA_Mode_e           mode;
 	 float                steerPID;
 	 float                steerStanley;
-	 LaneSelectOutput_t   lane;
-	 EgoData_t            ego;
+	 Lane_Data_LS_t   lane;
+	 Ego_Data_t            ego;
  
 	 /* 출력 */
 	 float                steerOut;

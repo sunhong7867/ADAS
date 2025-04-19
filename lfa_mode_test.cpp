@@ -12,10 +12,10 @@
                            // (lfa.h 내부에 adas_shared.h 포함)
 
 /* ────────── 헬퍼/Fixture ─────────────────────────────────────── */
-static EgoData_t makeEgo(float vx)
+static Ego_Data_t makeEgo(float vx)
 {
-    EgoData_t e{};
-    std::memset(&e, 0, sizeof(EgoData_t));
+    Ego_Data_t e{};
+    std::memset(&e, 0, sizeof(Ego_Data_t));
     e.Ego_Velocity_X = vx;
     return e;
 }
@@ -23,14 +23,14 @@ static EgoData_t makeEgo(float vx)
 class LfaModeTest : public ::testing::Test
 {
 protected:
-    EgoData_t ego;             /* 기본 0 m/s → LOW_SPEED */
+    Ego_Data_t ego;             /* 기본 0 m/s → LOW_SPEED */
     void SetUp() override
     {
         ego = makeEgo(0.0f);
     }
     /* 편의 호출 래퍼 */
     LFA_Mode_e call(float speed)             { ego.Ego_Velocity_X = speed; return lfa_mode_selection(&ego); }
-    LFA_Mode_e callWithPtr(EgoData_t *ptr)   { return lfa_mode_selection(ptr); }
+    LFA_Mode_e callWithPtr(Ego_Data_t *ptr)   { return lfa_mode_selection(ptr); }
 };
 
 /*******************************************************************
@@ -80,7 +80,7 @@ TEST_F(LfaModeTest, TC_LFA_MODE_EQ_08_NULL_PTR_FALLBACK)
 TEST_F(LfaModeTest, TC_LFA_MODE_EQ_09_UNINITIALIZED_FIELD)
 {
     /* 쓰레기 값 시나리오 : 초기화하지 않고 memset 0xAA */
-    EgoData_t trash;
+    Ego_Data_t trash;
     std::memset(&trash, 0xAA, sizeof(trash));
     EXPECT_EQ(lfa_mode_selection(&trash), LFA_MODE_LOW_SPEED);
 }

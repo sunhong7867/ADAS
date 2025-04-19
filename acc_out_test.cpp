@@ -7,14 +7,16 @@
  *    1) EQ(동등 분할): TC_ACC_OUT_EQ_01 ~ TC_ACC_OUT_EQ_10
  *    2) BV(경계값 분석): TC_ACC_OUT_BV_01 ~ TC_ACC_OUT_BV_10
  *    3) RA(요구사항 분석): TC_ACC_OUT_RA_01 ~ TC_ACC_OUT_RA_10
- ****************************************************************************/
+****************************************************************************/
 
- #include <gtest/gtest.h>
- #include "acc.h"  // acc_output_selection(...), ACC_Mode_e, etc.
+#include <gtest/gtest.h>
+#include <cstring>
+#include <cmath>
+#include "acc.h"  // acc_output_selection(...), ACC_Mode_e, etc.
  
- /*------------------------------------------------------------------------------
-  * Test Fixture
-  *------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------
+ * Test Fixture
+ *------------------------------------------------------------------------------*/
  class AccOutputSelectionTest : public ::testing::Test {
  protected:
 	 // 입력 값들

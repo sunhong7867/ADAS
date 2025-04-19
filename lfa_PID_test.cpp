@@ -14,7 +14,7 @@
 #include <cstring>
 
 #include "lfa.h"              // calculate_steer_in_low_speed_pid prototype
-#include "lane_selection.h"   // LaneSelectOutput_t (PID 입력구조)
+#include "lane_selection.h"   // Lane_Data_LS_t (PID 입력구조)
 
 /*--------------------------------------------------------------------
  * DUT 내부의 적분 / 이전 오차 변수 테스트‑용 외부 노출
@@ -26,9 +26,9 @@ extern float g_pidPrevError;
 #endif
 
 /* ───── 헬퍼 ──────────────────────────────────────────────────── */
-static LaneSelectOutput_t makeLaneOut(float headingDeg, float offsetM)
+static Lane_Data_LS_t makeLaneOut(float headingDeg, float offsetM)
 {
-    LaneSelectOutput_t o{};
+    Lane_Data_LS_t o{};
     std::memset(&o, 0, sizeof(o));
     o.LS_Heading_Error = headingDeg;
     o.LS_Lane_Offset   = offsetM;
@@ -36,13 +36,13 @@ static LaneSelectOutput_t makeLaneOut(float headingDeg, float offsetM)
 }
 
 static constexpr float TOL = 1e-4f;          // 비교 허용 오차
-static constexpr float YAW_CLAMP = 540.0f;   // 시스템 최대/최소 조향각
+static constexpr float YAW_CLAMP = 27.0f;    // road‑wheel 최대/최소 조향각
 
 /* 테스트 픽스처 */
 class LfaPidTest : public ::testing::Test
 {
 protected:
-    LaneSelectOutput_t lane;
+    Lane_Data_LS_t lane;
     void SetUp() override
     {
         lane = makeLaneOut(0.0f, 0.0f);

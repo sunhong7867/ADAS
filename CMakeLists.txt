@@ -19,9 +19,9 @@ add_library(adas
     #ego_vehicle_estimation.c
 	#lane_selection.c
 	#target_selection.c
-	acc.c
+	#acc.c
 	#aeb.c
-	#lfa.c
+	lfa.c
 	#arbitration.c
 )
 
@@ -38,20 +38,20 @@ add_executable(adas_unit_tests
 	#target_selection_path_test.cpp
 	
 	#acc_mode_test.cpp
-	acc_distance_EQ_test.cpp
+	#acc_distance_EQ_test.cpp
 	#acc_distance_BV_test.cpp
 	#acc_distance_RA_test.cpp
 	#acc_speed_pid_test.cpp
 	#acc_out_test.cpp
 
-	#aeb_decel_test.cpp
-	#aeb_mode_test.cpp
 	#aeb_ttc_test.cpp
+	#aeb_mode_test.cpp
+	#aeb_decel_test.cpp
 
 	#lfa_mode_test.cpp
-	#lfa_output_test.cpp
-	#lfa_PID_test.cpp
+	lfa_pid_test.cpp
 	#lfa_stanley_test.cpp
+	#lfa_output_test.cpp
 
 	#arbitration_test.cpp
 )

@@ -227,10 +227,6 @@ typedef enum {
 /*=============================================================
  * 6) LFA 모드
  *============================================================*/
-typedef enum {
-    LFA_MODE_LOW_SPEED = 0,
-    LFA_MODE_HIGH_SPEED
-} LFA_Mode_e;
 
 #define LFA_LOW_SPEED_THRESHOLD 16.67f
 #define LFA_MAX_STEERING_ANGLE  540.0f

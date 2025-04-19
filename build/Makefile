@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-acc.obj: acc.c.obj
-.PHONY : acc.obj
+lfa.obj: lfa.c.obj
+.PHONY : lfa.obj
 
 # target to build an object file
-acc.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.obj
-.PHONY : acc.c.obj
+lfa.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.obj
+.PHONY : lfa.c.obj
 
-acc.i: acc.c.i
-.PHONY : acc.i
+lfa.i: lfa.c.i
+.PHONY : lfa.i
 
 # target to preprocess a source file
-acc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.i
-.PHONY : acc.c.i
+lfa.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.i
+.PHONY : lfa.c.i
 
-acc.s: acc.c.s
-.PHONY : acc.s
+lfa.s: lfa.c.s
+.PHONY : lfa.s
 
 # target to generate assembly for a file
-acc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.s
-.PHONY : acc.c.s
+lfa.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.s
+.PHONY : lfa.c.s
 
-acc_distance_EQ_test.obj: acc_distance_EQ_test.cpp.obj
-.PHONY : acc_distance_EQ_test.obj
+lfa_pid_test.obj: lfa_pid_test.cpp.obj
+.PHONY : lfa_pid_test.obj
 
 # target to build an object file
-acc_distance_EQ_test.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/acc_distance_EQ_test.cpp.obj
-.PHONY : acc_distance_EQ_test.cpp.obj
+lfa_pid_test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_pid_test.cpp.obj
+.PHONY : lfa_pid_test.cpp.obj
 
-acc_distance_EQ_test.i: acc_distance_EQ_test.cpp.i
-.PHONY : acc_distance_EQ_test.i
+lfa_pid_test.i: lfa_pid_test.cpp.i
+.PHONY : lfa_pid_test.i
 
 # target to preprocess a source file
-acc_distance_EQ_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/acc_distance_EQ_test.cpp.i
-.PHONY : acc_distance_EQ_test.cpp.i
+lfa_pid_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_pid_test.cpp.i
+.PHONY : lfa_pid_test.cpp.i
 
-acc_distance_EQ_test.s: acc_distance_EQ_test.cpp.s
-.PHONY : acc_distance_EQ_test.s
+lfa_pid_test.s: lfa_pid_test.cpp.s
+.PHONY : lfa_pid_test.s
 
 # target to generate assembly for a file
-acc_distance_EQ_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/acc_distance_EQ_test.cpp.s
-.PHONY : acc_distance_EQ_test.cpp.s
+lfa_pid_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_pid_test.cpp.s
+.PHONY : lfa_pid_test.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... acc.obj
-	@echo ... acc.i
-	@echo ... acc.s
-	@echo ... acc_distance_EQ_test.obj
-	@echo ... acc_distance_EQ_test.i
-	@echo ... acc_distance_EQ_test.s
+	@echo ... lfa.obj
+	@echo ... lfa.i
+	@echo ... lfa.s
+	@echo ... lfa_pid_test.obj
+	@echo ... lfa_pid_test.i
+	@echo ... lfa_pid_test.s
 .PHONY : help
 
 

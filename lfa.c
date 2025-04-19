@@ -40,8 +40,11 @@ LFA_Mode_e lfa_mode_selection(const Ego_Data_t *pEgoData)
 float calculate_steer_in_low_speed_pid(const Lane_Data_LS_t *pLaneData,
                                        float deltaTime)
 {
-    if(!pLaneData || deltaTime <= 0.0f)
+    if (!pLaneData || deltaTime <= 0.0f ||
+        isnan(pLaneData->LS_Heading_Error) || isnan(pLaneData->LS_Lane_Offset) ||
+        isinf(pLaneData->LS_Heading_Error) || isinf(pLaneData->LS_Lane_Offset)) {
         return 0.0f;
+    }
 
     /* 오차 계산: 가중합 (K_offset * LaneOffset + K_heading * HeadingError) */
     float K_offset  = 1.0f;  // 비중 예시

@@ -203,19 +203,12 @@ typedef struct {
 } AEB_Target_t;
 
 /*=============================================================
- * 5) ACC/AEB 모드
+ * 5) ACC/AEB
  *============================================================*/
 /* 설계 코드에서 ACC는 'ACC_Mode_e'라 명명하므로 통일 */
 
 #define MAX_ACCEL  10.0f
 #define MIN_ACCEL -10.0f
-
-/* AEB 모드 */
-typedef enum {
-    AEB_MODE_NORMAL = 0,
-    AEB_MODE_ALERT,
-    AEB_MODE_BRAKE
-} AEB_Mode_e;
 
 /* AEB 상수들 */
 #define AEB_MAX_BRAKE_DECEL  -10.0f
@@ -225,7 +218,7 @@ typedef enum {
 #define AEB_DEFAULT_MAX_DECEL 9.0f
 
 /*=============================================================
- * 6) LFA 모드
+ * 6) LFA
  *============================================================*/
 
 #define LFA_LOW_SPEED_THRESHOLD 16.67f

@@ -59,12 +59,6 @@ typedef struct
     float Relative_Speed; /* (-100, 100) [m/s] */
 } TTC_Data_t;
 
-/* 최대 감속 성능, 경고 시 여유시간 등 상수 정의 */
-#define AEB_MAX_BRAKE_DECEL         (-10.0f)  /* 실제 제동시 최대 감속도 [m/s^2] */
-#define AEB_MIN_BRAKE_DECEL         (-2.0f)   /* 최소 감속도 (약하게 브레이크) [m/s^2] */
-#define AEB_DEFAULT_MAX_DECEL       (9.0f)    /* TTC_Brake 계산용(양수) */
-#define AEB_ALERT_BUFFER_TIME       (1.2f)    /* 경고 여유시간 */
-
 /**
  * @brief 2.2.3.1.1 calculate_ttc_for_aeb
  * Ego 차량과 AEB 타겟 간의 상대 속도 및 거리 정보를 기반으로 TTC를 계산.

@@ -87,7 +87,9 @@
 		"*.tcc": "cpp",
 		"memory_resource": "cpp",
 		"string_view": "cpp",
-		"adas_shared.h": "c"
+		"adas_shared.h": "c",
+		"stdbool.h": "c",
+		"ego_vehicle_estimation.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "disabled"
 }

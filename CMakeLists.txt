@@ -16,18 +16,19 @@ enable_testing()
 
 # 대상 라이브러리 추가
 add_library(adas
-    #ego_vehicle_estimation.c
+    ego_vehicle_estimation.c
 	#lane_selection.c
 	#target_selection.c
 	#acc.c
 	#aeb.c
-	lfa.c
+	#lfa.c
 	#arbitration.c
 )
 
 # 테스트 실행 파일 추가
 add_executable(adas_unit_tests 
-    #ego_vehicle_estimation_EQ_test.cpp
+	#test.cpp
+    ego_vehicle_estimation_EQ_test.cpp
 	#ego_vehicle_estimation_BV_test.cpp
 	#ego_vehicle_estimation_RA_test.cpp
 	
@@ -51,7 +52,7 @@ add_executable(adas_unit_tests
 	#lfa_mode_test.cpp
 	#lfa_pid_test.cpp
 	#lfa_stanley_test.cpp
-	lfa_output_test.cpp
+	#lfa_output_test.cpp
 
 	#arbitration_test.cpp
 )

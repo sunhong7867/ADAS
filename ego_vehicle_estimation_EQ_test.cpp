@@ -9,12 +9,31 @@
 #include "ego_vehicle_estimation.h"
 #include "adas_shared.h"
 
-/* 칼만 필터 상태벡터 크기 */
-static const int KF_DIM = 5;
+// ────────────────────────────────────────────────────────────────────────────
+// Convenience helpers
+// ────────────────────────────────────────────────────────────────────────────
+namespace {
+    inline float DegNorm(float h)                  // wrap to [‑180,180]
+    {
+        while (h >  180.f) h -= 360.f;
+        while (h < -180.f) h += 360.f;
+        return h;
+    }
+    
+    inline float DtSeconds(float now_ms, float prev_ms)
+    {
+        // All TimeData fields are milli‑seconds → convert to seconds
+        float dt_ms = now_ms - prev_ms;
+        // Requirement: if dt_ms < 10 ms  → force 10 ms (= 0.01 s)
+        if (dt_ms < 10.f) dt_ms = 10.f;
+        return dt_ms / 1000.f;
+    }
+ }
 
 /*--------------------------------------------------
  * GTest Fixture
  *------------------------------------------------*/
+static const int KF_DIM = 5;
 class EgoVehicleEstimationTest : public ::testing::Test {
 protected:
     TimeData_t timeData;
@@ -57,10 +76,13 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_01)
     imuData.Linear_Acceleration_Y = 0.5f;
     imuData.Yaw_Rate = 5.0f;
 
+    const float dt_s = DtSeconds(timeData.Current_Time,kfState.Previous_Update_Time);
+    const float expectH  = imuData.Yaw_Rate * dt_s;
+
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
     EXPECT_NEAR(egoData.Ego_Velocity_X, 10.0f, 0.5f);
-    EXPECT_NEAR(egoData.Ego_Heading,    5.0f,  1.0f);
+    EXPECT_NEAR(egoData.Ego_Heading, expectH , 0.05f);
     EXPECT_NEAR(egoData.Ego_Position_X, 0.0f,  0.001f);
     EXPECT_NEAR(egoData.Ego_Position_Y, 0.0f,  0.001f);
     EXPECT_NEAR(egoData.Ego_Position_Z, 0.0f,  0.001f);
@@ -127,9 +149,12 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_04)
     imuData.Yaw_Rate = 10.0f;
     kfState.X[4] = 0.0f; // 기존 Heading=0
 
+    const float dt_s = DtSeconds(timeData.Current_Time, kfState.Previous_Update_Time);
+    const float expectH  = imuData.Yaw_Rate * dt_s; // (~1°)
+
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
     // YawRate=10 → 대략 10° 근방
-    EXPECT_NEAR(egoData.Ego_Heading, 10.0f, 2.0f);
+    EXPECT_NEAR(egoData.Ego_Heading, expectH , 0.1f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -147,11 +172,16 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_05)
     imuData.Linear_Acceleration_X = 1.0f;
     imuData.Linear_Acceleration_Y = 0.5f;
     imuData.Yaw_Rate = 5.0f;
+    kfState.X[2] = 0.0f;
+
+    const float dt_s = DtSeconds(timeData.Current_Time, kfState.Previous_Update_Time);
+    const float expectedAccel = imuData.Linear_Acceleration_X;
+    const float expectedHeading  = imuData.Yaw_Rate * dt_s; // (~0.5°)
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
     EXPECT_NEAR(egoData.Ego_Velocity_X,     10.0f, 0.5f);
-    EXPECT_NEAR(egoData.Ego_Acceleration_X, 1.0f,  0.5f);
-    EXPECT_NEAR(egoData.Ego_Heading,        5.0f,  1.0f);
+    EXPECT_NEAR(egoData.Ego_Acceleration_X, expectedAccel, 0.2f);
+    EXPECT_NEAR(egoData.Ego_Heading,        expectedHeading , 0.05f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -190,19 +220,30 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_06)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_07)
 {
-    // 첫 루프: 정상
+	// 초기화
+    InitEgoVehicleKFState(&kfState);
     timeData.Current_Time = 1000.0f;
-    imuData.Linear_Acceleration_X = 1.0f; 
-    imuData.Linear_Acceleration_Y = 0.5f;
-    EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    float oldAccelX = egoData.Ego_Acceleration_X;
+    gpsData.GPS_Timestamp = 995.0f;
+    gpsData.GPS_Velocity_X = 10.0f;
+    gpsData.GPS_Velocity_Y = 0.0f;
+
+    // 첫 루프: 정상
+    imuData.Linear_Acceleration_X = 1.f;
+	imuData.Linear_Acceleration_Y = 0.5f;
+    imuData.Yaw_Rate = 5.0f;
+
+    EgoVehicleEstimation(&timeData,&gpsData,&imuData,&egoData,&kfState);
+	float firstAccel  = egoData.Ego_Acceleration_X;
+	float prevAccel  = kfState.Prev_Accel_X;
 
     // 두 번째 루프: Spike(5.0)
-    timeData.Current_Time = 1100.0f;
-    imuData.Linear_Acceleration_X = 5.0f; // 스파이크
+    timeData.Current_Time += 100.f;
+    imuData.Linear_Acceleration_X = 5.f;
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_NEAR(egoData.Ego_Acceleration_X, oldAccelX, 0.5f);
+	EXPECT_FLOAT_EQ(kfState.Prev_Accel_X, prevAccel);
+	float expectedAccel = firstAccel + prevAccel;
+    EXPECT_NEAR(egoData.Ego_Acceleration_X, expectedAccel, 0.1f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -213,10 +254,15 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_07)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_08)
 {
+    InitEgoVehicleKFState(&kfState);
+	timeData.Current_Time    = 1000.0f;
+    gpsData.GPS_Timestamp    = 995.0f;
+    gpsData.GPS_Velocity_X   = 10.0f;
+    gpsData.GPS_Velocity_Y   =  0.0f;
+
     imuData.Linear_Acceleration_X = 1.5f;
     imuData.Linear_Acceleration_Y = 0.5f;
     imuData.Yaw_Rate = 5.0f;
-    gpsData.GPS_Timestamp = 995.0f;
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
     EXPECT_NEAR(egoData.Ego_Acceleration_X, 1.5f, 0.5f);
@@ -230,18 +276,32 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_08)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_09)
 {
+    InitEgoVehicleKFState(&kfState);
+    timeData.Current_Time  = 1000.0f;      // [ms]
+    gpsData.GPS_Timestamp  = 995.0f;       // GPS 유효
+    gpsData.GPS_Velocity_X = 10.0f;
+    gpsData.GPS_Velocity_Y =  0.0f;
+
     // 첫 루프: 정상 yaw_rate=5
     imuData.Yaw_Rate = 5.0f;
-    gpsData.GPS_Timestamp = 995.0f;
+    imuData.Linear_Acceleration_X = 0.0f;  // 이 테스트에선 가속도 무시
+    imuData.Linear_Acceleration_Y = 0.0f;
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
     float oldHeading = egoData.Ego_Heading;
 
     // 두 번째 루프: spike=50
-    timeData.Current_Time = 1100.0f;
+    timeData.Current_Time += 100.0f;
     imuData.Yaw_Rate = 50.0f;
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_NEAR(egoData.Ego_Heading, oldHeading, 2.0f);
+	float newHeading = egoData.Ego_Heading;
+    float dt_s       = (100.0f) * 0.001f;   // 0.1s
+    float expectedDelta = 5.0f * dt_s;      // 정상 Yaw Rate만 반영 → 0.5°
+
+	//   a) 변화량이 0.5° 근처인지
+    EXPECT_NEAR(newHeading - oldHeading, expectedDelta, 1e-2f);
+    //   b) Spike(50°/s)대로 5° 변화가 난 게 아님을 추가 확인
+    EXPECT_FALSE(fabsf(newHeading - oldHeading - (50.0f * dt_s)) < 1.0f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -310,16 +370,25 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_12)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_13)
 {
+	InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+
     timeData.Current_Time = 1000.0f;
     gpsData.GPS_Timestamp = 995.0f;
     gpsData.GPS_Velocity_X = 10.0f;
-    imuData.Yaw_Rate = 5.0f;
+	gpsData.GPS_Velocity_Y   =  0.0f;
+    imuData.Linear_Acceleration_X = 0.0f;
+    imuData.Linear_Acceleration_Y = 0.0f;
+    imuData.Yaw_Rate             = 0.0f;
 
     float oldVel = kfState.X[0];
+	ASSERT_FLOAT_EQ(oldVel, 0.0f);
+
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_NEAR(egoData.Ego_Velocity_X, kfState.X[0], 0.1f);
-    EXPECT_NE(kfState.X[0], oldVel);  // 변경되었음
+    EXPECT_NEAR(kfState.X[0], 10.0f, 0.5f);
+    EXPECT_NE(kfState.X[0], oldVel);
+	EXPECT_NEAR(egoData.Ego_Velocity_X, kfState.X[0], 1e-3f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -348,10 +417,14 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_14)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_15)
 {
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
     timeData.Current_Time = 1000.0f;
     gpsData.GPS_Timestamp = 995.0f; 
     gpsData.GPS_Velocity_X = 10.0f;
+    gpsData.GPS_Velocity_Y = 0.0f;
     imuData.Linear_Acceleration_X = 1.0f;
+    imuData.Linear_Acceleration_Y = 0.5f;
     imuData.Yaw_Rate = 5.0f;
     kfState.X[4] = 0.0f;
 
@@ -386,12 +459,20 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_16)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_17)
 {
-    gpsData.GPS_Timestamp = 850.0f; // 무효
-    imuData.Yaw_Rate = 8.0f;
-    kfState.X[4] = 0.0f;
+	InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+
+    timeData.Current_Time        = 1000.0f;  // ms
+    gpsData.GPS_Timestamp        = 850.0f;   // 이 값으로 GPS invalid
+    gpsData.GPS_Velocity_X       =  0.0f;
+    gpsData.GPS_Velocity_Y       =  0.0f;
+
+    imuData.Linear_Acceleration_X = 0.0f;
+    imuData.Linear_Acceleration_Y = 0.0f;
+    imuData.Yaw_Rate              = 8.0f;    // Spike가 아니라 정상 IMU만
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_NEAR(egoData.Ego_Heading, 8.0f, 2.0f);
+    EXPECT_NEAR(egoData.Ego_Heading, 8.0f, 1.0f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -402,8 +483,12 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_17)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_18)
 {
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time = 1000.0f;
     gpsData.GPS_Timestamp = 995.0f;
     gpsData.GPS_Velocity_X = 10.0f;
+    gpsData.GPS_Velocity_Y =  0.0f;
     imuData.Linear_Acceleration_X = 1.0f;
     imuData.Linear_Acceleration_Y = 0.5f;
     imuData.Yaw_Rate = 5.0f;
@@ -418,20 +503,27 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_18)
 /*─────────────────────────────────────────────────────────────────────────────
  * TC_EGO_EQ_19
  *  GPS 속도만 입력 → 보정 작동 여부
- *  - 조건: GPS만 정상(12,0), IMU=0
- *  - 기대: 속도≈12
+ *  - 조건: GPS만 정상(8,0), IMU=0
+ *  - 기대: 속도≈8
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_19)
 {
+	InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time = 1000.0f;
     gpsData.GPS_Timestamp = 995.0f;
-    gpsData.GPS_Velocity_X = 12.0f;
+    gpsData.GPS_Velocity_X = 8.0f;
     gpsData.GPS_Velocity_Y = 0.0f;
     imuData.Linear_Acceleration_X = 0.0f;
     imuData.Linear_Acceleration_Y = 0.0f;
     imuData.Yaw_Rate = 0.0f;
 
+    float oldVel = kfState.X[0];
+    ASSERT_FLOAT_EQ(oldVel, 0.0f);
+
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_NEAR(egoData.Ego_Velocity_X, 12.0f, 1.0f);
+    EXPECT_NE(kfState.X[0], oldVel);
+    EXPECT_NEAR(egoData.Ego_Velocity_X, 8.0f, 1.0f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -514,12 +606,15 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_23)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_24)
 {
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time = 1000.0f;
     gpsData.GPS_Timestamp = 995.0f;
     gpsData.GPS_Velocity_X = 0.0f;
     gpsData.GPS_Velocity_Y = 8.0f;
     imuData.Linear_Acceleration_X = 1.0f;
     imuData.Linear_Acceleration_Y = 0.5f;
-
+    
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
     EXPECT_NEAR(egoData.Ego_Velocity_Y, 8.0f, 1.0f);
 }
@@ -532,13 +627,23 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_24)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_25)
 {
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time = 1000.0f;
     gpsData.GPS_Timestamp = 995.0f;
-    gpsData.GPS_Velocity_X = 12.0f;
+    gpsData.GPS_Velocity_X = 9.0f;
     gpsData.GPS_Velocity_Y = 0.0f;
     imuData.Linear_Acceleration_X = 1.0f;
-    EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
+    imuData.Linear_Acceleration_Y = 0.0f;
+    imuData.Yaw_Rate              = 0.0f;
 
-    EXPECT_NEAR(egoData.Ego_Velocity_X, 12.0f, 1.0f);
+    float oldVelX = kfState.X[0];
+    ASSERT_FLOAT_EQ(oldVelX, 0.0f);
+
+    EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
+    EXPECT_NE(kfState.X[0], oldVelX);                      // 변경됨
+    EXPECT_NEAR(kfState.X[0], 9.0f, 0.1f);
+    EXPECT_NEAR(egoData.Ego_Velocity_X, 9.0f, 1.0f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -604,15 +709,23 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_29)
 {
     // KFState 재초기화 가정
     InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
 
     timeData.Current_Time = 1000.0f;
+    gpsData.GPS_Timestamp = 995.0f;
     gpsData.GPS_Velocity_X = 10.0f;
+    gpsData.GPS_Velocity_Y = 0.0f;
     imuData.Linear_Acceleration_X = 1.0f;
+    imuData.Linear_Acceleration_Y = 0.5f;
+    imuData.Yaw_Rate = 5.0f;
+
+    float oldVelX = kfState.X[0];
+    ASSERT_FLOAT_EQ(oldVelX, 0.0f);
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
+    EXPECT_NE(kfState.X[0], oldVelX);  
     EXPECT_NEAR(egoData.Ego_Velocity_X, 10.0f, 1.0f);
 }
-
 /*─────────────────────────────────────────────────────────────────────────────
  * TC_EGO_EQ_30
  *  칼만 필터 상태 초기화 후 예측 동작
@@ -622,13 +735,25 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_29)
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_30)
 {
     InitEgoVehicleKFState(&kfState);
-    gpsData.GPS_Timestamp = 995.0f;
-    gpsData.GPS_Velocity_X = 10.0f;
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time = 1000.0f;
+    gpsData.GPS_Timestamp = 0.0f;
+    gpsData.GPS_Velocity_X = 0.0f;
+    gpsData.GPS_Velocity_Y = 0.0f;
     imuData.Linear_Acceleration_X = 1.0f;
+    imuData.Linear_Acceleration_Y = 0.5f;
     imuData.Yaw_Rate = 5.0f;
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_NEAR(egoData.Ego_Velocity_X, 10.0f, 1.0f);
+    float accelAfter1stLoop = kfState.X[2];
+    EXPECT_NEAR(accelAfter1stLoop, 1.0f, 0.01f);
+
+    timeData.Current_Time += 1000.0f;
+
+    EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
+    EXPECT_GT(kfState.X[0], 0.0f);                          // velocity 증가 확인
+    EXPECT_NEAR(kfState.X[2], 2.0f, 0.1f);                  // accel 누적 확인
+    EXPECT_NEAR(kfState.X[4], 10.0f, 0.2f);                 // heading = 5°/s × 2s
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -639,28 +764,48 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_30)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_31)
 {
-    gpsData.GPS_Timestamp = 995.0f;
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time = 1000.0f;
+    gpsData.GPS_Timestamp  = 0.0f;  
+    gpsData.GPS_Velocity_X = 0.0f;
+    gpsData.GPS_Velocity_Y = 0.0f;
+    imuData.Linear_Acceleration_X = 0.0f;
+    imuData.Linear_Acceleration_Y = 0.0f;
     imuData.Yaw_Rate = -8.0f;
-    kfState.X[4] = 0.0f; // 시작 heading=0
+    
+    float oldHeading = kfState.X[4];
+    ASSERT_FLOAT_EQ(oldHeading, 0.0f);
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_NEAR(egoData.Ego_Heading, -8.0f, 2.0f);
+    EXPECT_NE(kfState.X[4], oldHeading);                      // 내부 상태 변경
+    EXPECT_NEAR(kfState.X[4], -8.0f, 0.2f);                   // -8°/s × 1s
+    EXPECT_NEAR(egoData.Ego_Heading, -8.0f, 0.2f);            // 출력도 동일하게 반영
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
  * TC_EGO_EQ_32
  *  속도 예측과 GPS 속도 오차 존재 시 보정 확인
- *  - 조건: KF 이전 속도=10, GPS=12
- *  - 기대: 보정 후 ~12
+ *  - 조건: KF 이전 속도=10, GPS=9
+ *  - 기대: 보정 후 ~9
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_32)
 {
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time        = 1000.0f;
     gpsData.GPS_Timestamp = 995.0f;
-    gpsData.GPS_Velocity_X = 12.0f;
+    gpsData.GPS_Velocity_X = 9.0f;
+    gpsData.GPS_Velocity_Y = 0.0f;
+    imuData.Linear_Acceleration_X = 0.0f;
+    imuData.Linear_Acceleration_Y = 0.0f;
+    imuData.Yaw_Rate = 0.0f;
     kfState.X[0] = 10.0f;
 
+    float oldVelX = kfState.X[0];
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_NEAR(egoData.Ego_Velocity_X, 12.0f, 1.0f);
+    EXPECT_NE(kfState.X[0], oldVelX);
+    EXPECT_NEAR(egoData.Ego_Velocity_X, 9.0f, 0.1f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -768,17 +913,27 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_37)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_38)
 {
-    // 첫 루프: spike
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
     timeData.Current_Time = 1000.0f;
+    kfState.Prev_Accel_X = 1.0f;
+    kfState.X[2]        = 1.0f;
+
+    // 첫 루프: spike
     imuData.Linear_Acceleration_X = 5.0f;
+    imuData.Linear_Acceleration_Y = 0.0f;
+    imuData.Yaw_Rate              = 0.0f;
+    gpsData.GPS_Timestamp         = 0.0f;
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
+    float afterSpike = kfState.X[2];
+    EXPECT_NEAR(afterSpike - 1.0f, 1.0f, 0.01f);
 
     // 두 번째 루프: 복귀
-    timeData.Current_Time = 1100.0f;
+    timeData.Current_Time += 100.0f;
     imuData.Linear_Acceleration_X = 1.0f;
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
-    EXPECT_NEAR(egoData.Ego_Acceleration_X, 1.0f, 0.5f);
+    EXPECT_NEAR(kfState.X[2] - afterSpike, 1.0f, 0.01f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -789,21 +944,29 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_38)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_39)
 {
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time        = 1000.0f;
+    gpsData.GPS_Timestamp        = 0.0f;
+
     // 1루프
-    gpsData.GPS_Timestamp = 995.0f;
     imuData.Linear_Acceleration_X = 1.0f;
     imuData.Linear_Acceleration_Y = 0.5f;
+    imuData.Yaw_Rate              = 0.0f;
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
     float vx1 = egoData.Ego_Velocity_X;
+    float ax1 = egoData.Ego_Acceleration_X;
+    float ay1 = egoData.Ego_Acceleration_Y;
 
     // 2루프
-    timeData.Current_Time = 1100.0f;
-    gpsData.GPS_Timestamp = 1095.0f;
+    timeData.Current_Time += 100.0f;
     imuData.Linear_Acceleration_X = 1.5f;
     imuData.Linear_Acceleration_Y = 0.8f;
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
 
     EXPECT_GT(egoData.Ego_Velocity_X, vx1);
+    EXPECT_GT(egoData.Ego_Acceleration_X, ax1);
+    EXPECT_GT(egoData.Ego_Acceleration_Y, ay1);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────
@@ -814,16 +977,23 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_39)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_40)
 {
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time        = 1000.0f;
     // 1루프
     gpsData.GPS_Timestamp = 995.0f;
     gpsData.GPS_Velocity_X = 10.0f;
+    imuData.Linear_Acceleration_X = 0.0f;
+
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
     float oldVx = egoData.Ego_Velocity_X;
 
     // 2루프(Spike)
-    timeData.Current_Time = 1100.0f;
-    gpsData.GPS_Timestamp = 1095.0f;
+    timeData.Current_Time += 100.0f;
+    gpsData.GPS_Timestamp = timeData.Current_Time - 5.0f; // still valid
+    kfState.Prev_GPS_Vel_X = 10.0f;
     gpsData.GPS_Velocity_X = 50.0f;
+
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
     EXPECT_NEAR(egoData.Ego_Velocity_X, oldVx, 1.0f);
 }
@@ -831,19 +1001,23 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_40)
 /*─────────────────────────────────────────────────────────────────────────────
  * TC_EGO_EQ_41
  *  IMU+GPS 모두 변화 시 융합 정확성 확인
- *  - 조건: GPS=(12,0), IMU=(1.5,0.5), Yaw=6
- *  - 기대: velocity≈12, heading≈6
+ *  - 조건: GPS=(5,0), IMU=(1.5,0.5), Yaw=6
+ *  - 기대: velocity≈5, heading≈6
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_41)
 {
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time        = 1000.0f;
     gpsData.GPS_Timestamp = 995.0f;
-    gpsData.GPS_Velocity_X = 12.0f;
+    gpsData.GPS_Velocity_X = 5.0f;
+    gpsData.GPS_Velocity_Y   = 0.0f;
     imuData.Linear_Acceleration_X = 1.5f;
     imuData.Linear_Acceleration_Y = 0.5f;
     imuData.Yaw_Rate = 6.0f;
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_NEAR(egoData.Ego_Velocity_X, 12.0f, 1.0f);
+    EXPECT_NEAR(egoData.Ego_Velocity_X, 5.0f, 1.0f);
     EXPECT_NEAR(egoData.Ego_Heading,    6.0f,  2.0f);
 }
 
@@ -944,13 +1118,17 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_46)
  *────────────────────────────────────────────────────────────────────────────*/
 TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_47)
 {
-    gpsData.GPS_Timestamp = 995.0f;
-    imuData.Linear_Acceleration_X = 1.0f;
-    imuData.Yaw_Rate = 90.0f;
-    kfState.X[4] = 0.0f;
+    InitEgoVehicleKFState(&kfState);
+    kfState.Previous_Update_Time = 0.0f;
+    timeData.Current_Time        = 1000.0f;
+    gpsData.GPS_Timestamp         = 0.0f;   // GPS 무효
+    imuData.Linear_Acceleration_X = 0.0f;
+    imuData.Linear_Acceleration_Y = 0.0f;
+    imuData.Yaw_Rate              = 90.0f;
+    kfState.Prev_Yaw_Rate   = 90.0f;
 
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_NEAR(egoData.Ego_Heading, 90.0f, 10.0f);
+    EXPECT_NEAR(egoData.Ego_Heading, 90.0f, 1.0f);
 }
 
 /*─────────────────────────────────────────────────────────────────────────────

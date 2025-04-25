@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-lfa.obj: lfa.c.obj
-.PHONY : lfa.obj
+ego_vehicle_estimation.obj: ego_vehicle_estimation.c.obj
+.PHONY : ego_vehicle_estimation.obj
 
 # target to build an object file
-lfa.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.obj
-.PHONY : lfa.c.obj
+ego_vehicle_estimation.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/ego_vehicle_estimation.c.obj
+.PHONY : ego_vehicle_estimation.c.obj
 
-lfa.i: lfa.c.i
-.PHONY : lfa.i
+ego_vehicle_estimation.i: ego_vehicle_estimation.c.i
+.PHONY : ego_vehicle_estimation.i
 
 # target to preprocess a source file
-lfa.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.i
-.PHONY : lfa.c.i
+ego_vehicle_estimation.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/ego_vehicle_estimation.c.i
+.PHONY : ego_vehicle_estimation.c.i
 
-lfa.s: lfa.c.s
-.PHONY : lfa.s
+ego_vehicle_estimation.s: ego_vehicle_estimation.c.s
+.PHONY : ego_vehicle_estimation.s
 
 # target to generate assembly for a file
-lfa.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lfa.c.s
-.PHONY : lfa.c.s
+ego_vehicle_estimation.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/ego_vehicle_estimation.c.s
+.PHONY : ego_vehicle_estimation.c.s
 
-lfa_output_test.obj: lfa_output_test.cpp.obj
-.PHONY : lfa_output_test.obj
+ego_vehicle_estimation_EQ_test.obj: ego_vehicle_estimation_EQ_test.cpp.obj
+.PHONY : ego_vehicle_estimation_EQ_test.obj
 
 # target to build an object file
-lfa_output_test.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_output_test.cpp.obj
-.PHONY : lfa_output_test.cpp.obj
+ego_vehicle_estimation_EQ_test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_EQ_test.cpp.obj
+.PHONY : ego_vehicle_estimation_EQ_test.cpp.obj
 
-lfa_output_test.i: lfa_output_test.cpp.i
-.PHONY : lfa_output_test.i
+ego_vehicle_estimation_EQ_test.i: ego_vehicle_estimation_EQ_test.cpp.i
+.PHONY : ego_vehicle_estimation_EQ_test.i
 
 # target to preprocess a source file
-lfa_output_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_output_test.cpp.i
-.PHONY : lfa_output_test.cpp.i
+ego_vehicle_estimation_EQ_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_EQ_test.cpp.i
+.PHONY : ego_vehicle_estimation_EQ_test.cpp.i
 
-lfa_output_test.s: lfa_output_test.cpp.s
-.PHONY : lfa_output_test.s
+ego_vehicle_estimation_EQ_test.s: ego_vehicle_estimation_EQ_test.cpp.s
+.PHONY : ego_vehicle_estimation_EQ_test.s
 
 # target to generate assembly for a file
-lfa_output_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lfa_output_test.cpp.s
-.PHONY : lfa_output_test.cpp.s
+ego_vehicle_estimation_EQ_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_EQ_test.cpp.s
+.PHONY : ego_vehicle_estimation_EQ_test.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... lfa.obj
-	@echo ... lfa.i
-	@echo ... lfa.s
-	@echo ... lfa_output_test.obj
-	@echo ... lfa_output_test.i
-	@echo ... lfa_output_test.s
+	@echo ... ego_vehicle_estimation.obj
+	@echo ... ego_vehicle_estimation.i
+	@echo ... ego_vehicle_estimation.s
+	@echo ... ego_vehicle_estimation_EQ_test.obj
+	@echo ... ego_vehicle_estimation_EQ_test.i
+	@echo ... ego_vehicle_estimation_EQ_test.s
 .PHONY : help
 
 

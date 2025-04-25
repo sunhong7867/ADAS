@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/adas.dir/lfa.c.obj"
-  "CMakeFiles/adas.dir/lfa.c.obj.d"
+  "CMakeFiles/adas.dir/ego_vehicle_estimation.c.obj"
+  "CMakeFiles/adas.dir/ego_vehicle_estimation.c.obj.d"
   "libadas.a"
   "libadas.pdb"
 )

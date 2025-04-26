@@ -71,29 +71,29 @@ include CMakeFiles/adas_unit_tests.dir/flags.make
 CMakeFiles/adas_unit_tests.dir/codegen:
 .PHONY : CMakeFiles/adas_unit_tests.dir/codegen
 
-CMakeFiles/adas_unit_tests.dir/test.cpp.obj: CMakeFiles/adas_unit_tests.dir/flags.make
-CMakeFiles/adas_unit_tests.dir/test.cpp.obj: CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp
-CMakeFiles/adas_unit_tests.dir/test.cpp.obj: C:/Projects/GoogleTestProject/test.cpp
-CMakeFiles/adas_unit_tests.dir/test.cpp.obj: CMakeFiles/adas_unit_tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Projects\GoogleTestProject\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/adas_unit_tests.dir/test.cpp.obj"
-	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/adas_unit_tests.dir/test.cpp.obj -MF CMakeFiles\adas_unit_tests.dir\test.cpp.obj.d -o CMakeFiles\adas_unit_tests.dir\test.cpp.obj -c C:\Projects\GoogleTestProject\test.cpp
+CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj: CMakeFiles/adas_unit_tests.dir/flags.make
+CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj: CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp
+CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj: C:/Projects/GoogleTestProject/lane_selection_test.cpp
+CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj: CMakeFiles/adas_unit_tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Projects\GoogleTestProject\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj -MF CMakeFiles\adas_unit_tests.dir\lane_selection_test.cpp.obj.d -o CMakeFiles\adas_unit_tests.dir\lane_selection_test.cpp.obj -c C:\Projects\GoogleTestProject\lane_selection_test.cpp
 
-CMakeFiles/adas_unit_tests.dir/test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/adas_unit_tests.dir/test.cpp.i"
-	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Projects\GoogleTestProject\test.cpp > CMakeFiles\adas_unit_tests.dir\test.cpp.i
+CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.i"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Projects\GoogleTestProject\lane_selection_test.cpp > CMakeFiles\adas_unit_tests.dir\lane_selection_test.cpp.i
 
-CMakeFiles/adas_unit_tests.dir/test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/adas_unit_tests.dir/test.cpp.s"
-	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Projects\GoogleTestProject\test.cpp -o CMakeFiles\adas_unit_tests.dir\test.cpp.s
+CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.s"
+	C:\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Projects\GoogleTestProject\lane_selection_test.cpp -o CMakeFiles\adas_unit_tests.dir\lane_selection_test.cpp.s
 
 # Object files for target adas_unit_tests
 adas_unit_tests_OBJECTS = \
-"CMakeFiles/adas_unit_tests.dir/test.cpp.obj"
+"CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj"
 
 # External object files for target adas_unit_tests
 adas_unit_tests_EXTERNAL_OBJECTS =
 
-adas_unit_tests.exe: CMakeFiles/adas_unit_tests.dir/test.cpp.obj
+adas_unit_tests.exe: CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj
 adas_unit_tests.exe: CMakeFiles/adas_unit_tests.dir/build.make
 adas_unit_tests.exe: libadas.a
 adas_unit_tests.exe: lib/libgtest.a

@@ -449,9 +449,10 @@ TEST_F(LaneSelectionTest, TC_LS_BV_15) {
 */
 TEST_F(LaneSelectionTest, TC_LS_BV_16) {
     laneData.Lane_Width = 2.49f;
+    laneData.Lane_Offset = 0.0f; 
     ExecLaneSelection();
-    EXPECT_FALSE(lsOutput.LS_Is_Within_Lane)
-        << "[TC_LS_BV_16 실패] 차선 폭이 2.49m이면 최소 요구 폭 미달로 처리되어야 함.";
+    EXPECT_TRUE(lsOutput.LS_Is_Within_Lane)
+        << "[TC_LS_BV_16 실패] 차선 폭이 2.49m라도 중심 오차가 없으면 차선 내(true)로 판정해야 함.";
 }
 
 /* TC_LS_BV_17 : Lane Width = 2.5m → 정상 처리

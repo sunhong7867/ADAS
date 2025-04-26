@@ -1,15 +1,15 @@
 [
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\ego_vehicle_estimation.c.obj -c C:\\Projects\\GoogleTestProject\\ego_vehicle_estimation.c",
-  "file": "C:/Projects/GoogleTestProject/ego_vehicle_estimation.c",
-  "output": "CMakeFiles/adas.dir/ego_vehicle_estimation.c.obj"
+  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\lane_selection.c.obj -c C:\\Projects\\GoogleTestProject\\lane_selection.c",
+  "file": "C:/Projects/GoogleTestProject/lane_selection.c",
+  "output": "CMakeFiles/adas.dir/lane_selection.c.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\adas_unit_tests.dir\\test.cpp.obj -c C:\\Projects\\GoogleTestProject\\test.cpp",
-  "file": "C:/Projects/GoogleTestProject/test.cpp",
-  "output": "CMakeFiles/adas_unit_tests.dir/test.cpp.obj"
+  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/adas_unit_tests.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\adas_unit_tests.dir\\lane_selection_test.cpp.obj -c C:\\Projects\\GoogleTestProject\\lane_selection_test.cpp",
+  "file": "C:/Projects/GoogleTestProject/lane_selection_test.cpp",
+  "output": "CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build/googletest/googlemock",

@@ -84,11 +84,11 @@
 		},
 		{
 			"backtrace" : 2,
-			"id" : "gtest::@f95b5c00bd49b3b4698d"
+			"id" : "gtest_main::@f95b5c00bd49b3b4698d"
 		},
 		{
 			"backtrace" : 2,
-			"id" : "gtest_main::@f95b5c00bd49b3b4698d"
+			"id" : "gtest::@f95b5c00bd49b3b4698d"
 		}
 	],
 	"id" : "adas_unit_tests::@6890427a1f51a3e7e1df",
@@ -153,7 +153,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "test.cpp",
+			"path" : "lane_selection_test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

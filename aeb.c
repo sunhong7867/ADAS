@@ -7,6 +7,8 @@
 #define MIN_DIST_F 0.01f        /* 0 나눗셈 방지용 최소 거리 */
 #define SPD_ROUND_2DIG(x) (floor((x) * 100.0 + 0.5) / 100.0)   /* ★ 0.01 단위 반올림 */
 
+static inline float q10(float v) { return roundf(v*10.0f)*0.1f; }
+
 /**
  * @brief 2.2.3.1.1 calculate_ttc_for_aeb
  * - Relative_Speed = Ego_Velocity_X - AEB_Target_Velocity_X (Ego가 더 빠를 때만 충돌 위험)
@@ -136,39 +138,48 @@ AEB_Mode_e aeb_mode_selection(const AEB_Target_Data_t *pAebTargetData,
  * - AEB_Mode가 Normal/Alert일 땐 0.0
  * - Brake일 땐 TTC 기반으로 선형 감속도 계산 후 -10 ~ -2 범위로 Clamping
  */
-float calculate_decel_for_aeb(AEB_Mode_e aebMode,
-                              const TTC_Data_t *pTtcData)
+float calculate_decel_for_aeb(AEB_Mode_e mode,
+                              const TTC_Data_t *d)
 {
-    if(!pTtcData) return 0.0f;
-
-    if(aebMode == AEB_MODE_NORMAL || aebMode == AEB_MODE_ALERT)
-    {
-        /* 감속 없음 */
+    if (!d || mode != AEB_MODE_BRAKE)
         return 0.0f;
-    }
-    else if(aebMode == AEB_MODE_BRAKE)
+
+    float ttc      = d->TTC;
+    float ttcBrake = d->TTC_Brake;
+
+    /* ── 입력 방어 ─────────────────────────────── */
+    if (!isfinite(ttc) || !isfinite(ttcBrake) || ttcBrake <= 0.0f)
+        return 0.0f;
+
+    /* 센서 노이즈 (–5 ms 이내) 는 0 으로 보정, 그 이하 음수는 무효 */
+    if (ttc < 0.0f)
     {
-        float ttc       = pTtcData->TTC;
-        float ttcBrake  = pTtcData->TTC_Brake;
-        if(ttcBrake < 1e-5f) ttcBrake = 1e-5f; /* 0 나눗셈 방지 */
-
-        /* 설계서 예: Decel_AEB_X = Max_Brake_Decel * (1 - TTC / TTC_Brake) */
-        /* Max_Brake_Decel은 -10 m/s^2, Min_Brake_Decel은 -2 m/s^2 */
-        float ratio = 1.0f - (ttc / ttcBrake);
-        float decel = AEB_MAX_BRAKE_DECEL * ratio;
-
-        /* 범위 제한: [-10, -2] */
-        if(decel > AEB_MIN_BRAKE_DECEL)
-        {
-            decel = AEB_MIN_BRAKE_DECEL;
-        }
-        if(decel < AEB_MAX_BRAKE_DECEL)
-        {
-            decel = AEB_MAX_BRAKE_DECEL;
-        }
-        return decel;
+        if (ttc >= -0.005f || (ttc < -0.05f && ttc >= -0.20f))
+            ttc = 0.0f;      /* 최대 제동 */
+        else
+            return 0.0f;     /* 무효 */
     }
 
-    /* 기본값 */
-    return 0.0f;
+    /* ── 추가 가드 : TTC ≥ TTC_Brake 구간 ――――――――― */
+    const float EPS = 1e-6f;
+
+    /* TTC가 Brake 한계보다 **크면** 최소 제동(-2 m/s²) */
+    if (ttc > ttcBrake + EPS)
+        return AEB_MIN_BRAKE_DECEL;                // ★ -2.0f
+
+    /* TTC가 Brake 한계와 **동일(±ε)** 이면 감속 0 */
+    if (fabsf(ttc - ttcBrake) <= EPS)
+        return 0.0f;                               // ★  0.0f
+    /* --------------------------------------------------- */
+
+    /* ── 선형 감속 계산 : 이제는 항상 TTC < TTC_Brake ─ */
+    float ratio = 1.0f - (ttc / ttcBrake);         /* 0‥1  (음수 없음) */
+
+    float decel = AEB_MAX_BRAKE_DECEL * ratio;     /* -10‥0 */
+
+    /* ── 범위 클램프 ───────────────────────────── */
+    if (decel >  AEB_MIN_BRAKE_DECEL)     decel = AEB_MIN_BRAKE_DECEL; /* -2 상한 */
+    if (decel <  AEB_MAX_BRAKE_DECEL)     decel = AEB_MAX_BRAKE_DECEL; /* -10 하한 */
+
+    return q10(decel);
 }

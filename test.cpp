@@ -1,471 +1,398 @@
 /*********************************************************************
- * aeb_mode_selection_test.cpp ― AEB Mode Selection 단위‑테스트 (60 TC)
- * -------------------------------------------------------------------
- * DUT  : aeb_mode_selection()   (aeb.c / aeb.h)
- * 규격 : 2.2.3.1.2  (사내 SW 설계서)
+ * aeb_decel_test.cpp ― AEB 감속 계산 Unit‑Test (60 TC)
+ * ---------------------------------------------------------------
+ * DUT  : calculate_decel_for_aeb()   (aeb.c / aeb.h)
+ * 규격 : 2.2.3.1.3  (사내 SW 설계서)
  *********************************************************************/
 #include <gtest/gtest.h>
 #include <cmath>
 #include <cfloat>
-#include "aeb.h"            // Unit‑Under‑Test
+#include "aeb.h"              // Unit‑Under‑Test
 #include "adas_shared.h"
 
-/* 내부 ‘∞’ 표현 값 ‑ DUT 와 동일해야 함 */
-constexpr float INF_TTC  = 99999.0f;
-constexpr float EPS_F    = 1e-4f;
+constexpr float EPS_F   = 1e-4f;
+constexpr float INF_TTC = 99999.0f;
 
-/* ────────── 헬퍼 구조체 빌더 ───────────────────────────────────── */
-static AEB_Target_Data_t makeTarget(int id,
-                                    AEB_Target_Situation_e situ,
-                                    float vel,
-                                    float dist = 40.0f)
+/* ────────── TTC 구조체 헬퍼 ─────────────────────────────────── */
+static TTC_Data_t makeTtc(float ttc, float brake, float alert)
 {
-    AEB_Target_Data_t t{};
-    t.AEB_Target_ID          = id;
-    t.AEB_Target_Situation   = situ;
-    t.AEB_Target_Velocity_X  = vel;
-    t.AEB_Target_Distance    = dist;
-    return t;
-}
-static Ego_Data_t makeEgo(float vel)
-{
-    Ego_Data_t e{};
-    e.Ego_Velocity_X = vel;
-    return e;
+    TTC_Data_t d{};
+    d.TTC        = ttc;
+    d.TTC_Brake  = brake;
+    d.TTC_Alert  = alert;
+    return d;
 }
 
-/* ────────── Fixture  ──────────────────────────────────────────── */
-class AebModeSelTest : public ::testing::Test
+/* ────────── Fixture ─────────────────────────────────────────── */
+class AebDecelTest : public ::testing::Test
 {
 protected:
-    AEB_Target_Data_t tgt;
-    Ego_Data_t        ego;
-    TTC_Data_t        ttc;
+    TTC_Data_t ttc;
     void SetUp() override
     {
-        tgt = makeTarget(0, AEB_TARGET_NORMAL, 10.0f);
-        ego = makeEgo(20.0f);
-        ttc = { 5.0f, 3.0f, 4.0f, 0.0f };   // 기본값 : Normal 구간
+        /* 기본값 : Brake 모드 정상 구간(TTC<TTC_Brake)   */
+        ttc = makeTtc(1.0f, 2.0f, 3.0f);
     }
-    /* 호출 래퍼 */
-    AEB_Mode_e call() const
+    float call(AEB_Mode_e m)
     {
-        return aeb_mode_selection(&tgt,&ego,&ttc);
+        return calculate_decel_for_aeb(m, &ttc);
     }
 };
 
 /*******************************************************************
  * 1) EQ  (동등 분할) 20 TC
  ******************************************************************/
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_01)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_01)   /* Normal → 0.0 */
 {
-    /* TTC > TTC_Alert → Normal */
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_NORMAL), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_02)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_02)   /* Alert → 0.0 */
 {
-    /* TTC_Brake < TTC ≤ TTC_Alert → Alert */
-    ttc = {2.5f,2.0f,3.0f,0.0f};
-    ego = makeEgo(15.0f);
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_ALERT), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_03)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_03)   /* Brake, TTC<TTC_Brake */
 {
-    /* 0 < TTC ≤ TTC_Brake → Brake */
-    ttc = {1.5f,2.0f,3.0f,0.0f};
-    ego = makeEgo(15.0f);
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(1.0f, 2.0f, 3.0f);      // –5.0 예상
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -5.0f, EPS_F);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_04)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_04)   /* Brake, TTC>TTC_Brake → -2 */
 {
-    /* TTC ≤ 0 → Normal */
-    ttc.TTC = 0.0f;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(2.5f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_05)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_05)   /* Brake, TTC=0 → -10 */
 {
-    /* TTC = ∞ → Normal */
-    ttc.TTC = INF_TTC;
-    ttc.TTC_Brake = 0.0f;
-    ttc.TTC_Alert = 0.0f;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(0.0f, 1.0f, 2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -10.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_06)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_06)   /* TTC>TTC_Brake (3.0>2.0) clamp */
 {
-    /* Ego < 0.5  → Normal */
-    ego = makeEgo(0.4f);
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(3.0f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_07)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_07)   /* TTC==TTC_Brake → 0 */
 {
-    /* Ego = 0 → Normal */
-    ego = makeEgo(0.0f);
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(2.0f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_08)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_08)   /* 재확인: 선형 계산 */
 {
-    /* Target ID = -1 → Normal */
-    tgt.AEB_Target_ID = -1;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(1.0f, 2.0f, 3.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -5.0f, EPS_F);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_09)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_09)   /* TTC NaN → 0.0 */
 {
-    /* Cut‑out → Normal */
-    tgt.AEB_Target_Situation = AEB_TARGET_CUT_OUT;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_10)
-{
-    /* Cut‑in + TTC < Brake → Brake */
-    tgt.AEB_Target_Situation = AEB_TARGET_CUT_IN;
-    ttc = {1.0f,1.5f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_11)
-{
-    /* Normal + TTC < Brake → Brake */
-    ttc = {1.0f,1.5f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_12)
-{
-    /* Cut‑in + Alert 범위 → Alert */
-    tgt.AEB_Target_Situation = AEB_TARGET_CUT_IN;
-    ttc = {2.0f,1.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_13)
-{
-    /* Cut‑in + TTC > Alert → Normal */
-    tgt.AEB_Target_Situation = AEB_TARGET_CUT_IN;
-    ttc = {4.0f,1.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_14)
-{
-    /* TTC = NaN → Normal */
     ttc.TTC = NAN;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_15)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_10)   /* TTC 음수 → 0.0 */
 {
-    /* TTC 음수 → Normal */
-    ttc.TTC = -0.5f;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc.TTC = -1.0f;
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_16)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_11)   /* TTC_Brake 0 → 0.0 */
 {
-    /* 구조체 NULL → Normal */
-    EXPECT_EQ(aeb_mode_selection(nullptr,&ego,&ttc), AEB_MODE_NORMAL);
+    ttc = makeTtc(1.0f, 0.0f, 2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_17)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_12)   /* TTC_Brake 극소 → clamp -2 */
 {
-    /* TTC_Brake 0 이지만 TTC < Brake → Brake */
-    ttc = { 5.0e-6f, 1.0e-5f, 1.2f, 8.0f };      // 0.000005 < 0.00001
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(0.5f, 1e-6f, 1.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_18)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_13)   /* TTC_Brake NaN → 0 */
 {
-    /* TTC_Alert = TTC_Brake 동일 → Brake */
-    ttc = {2.0f,2.0f,2.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc.TTC_Brake = NAN;
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_19)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_14)   /* TTC_Brake 음수 → 0 */
 {
-    /* TTC = TTC_Brake → Brake */
-    ttc = {2.0f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc.TTC_Brake = -1.0f;
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_EQ_20)
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_15)   /* pTtcData == nullptr → 0 */
 {
-    /* TTC = TTC_Alert → Alert */
-    ttc = {3.0f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
+    EXPECT_FLOAT_EQ(calculate_decel_for_aeb(AEB_MODE_BRAKE, nullptr), 0.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_16)   /* 내부 필드 0 → 0 */
+{
+    ttc = makeTtc(0.0f, 0.0f, 0.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_17)   /* Max_Brake_Decel 상수 확인 */
+{
+    ttc = makeTtc(1.0f, 2.0f, 3.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -5.0f, EPS_F);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_18)   /* 계산 -11 → clamp -10 */
+{
+    ttc = makeTtc(-0.1f, 1.0f, 2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -10.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_19)   /* 계산 -1 → clamp -2 */
+{
+    ttc = makeTtc(1.8f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_EQ_20)   /* Min_Brake_Decel 적용 확인 */
+{
+    ttc = makeTtc(1.8f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
 /*******************************************************************
  * 2) BV  (경계값 분석) 20 TC
  ******************************************************************/
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_01)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_01)   /* TTC 0.0 */
 {
-    ttc = {0.0f,1.0f,2.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(0.0f, 1.0f, 2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -10.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_02)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_02)   /* TTC 0.01 → -9.9 */
 {
-    ttc = {0.01f,0.02f,1.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(0.01f, 1.0f, 2.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -9.9f, 0.01f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_03)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_03)   /* TTC = TTC_Brake-0.01 */
 {
-    ttc = {1.99f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(1.99f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_04)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_04)   /* TTC == TTC_Brake */
 {
-    ttc = {2.0f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(2.0f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_05)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_05)   /* TTC_Brake+0.01 -> clamp -2 */
 {
-    ttc = {2.01f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
+    ttc = makeTtc(2.01f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_06)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_06)   /* TTC 음수 */
 {
-    ttc = {2.99f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
+    ttc = makeTtc(-0.01f, 1.0f, 2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_07)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_07)   /* TTC_Brake 1e-6 극소 */
 {
-    ttc = {3.0f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
+    ttc = makeTtc(0.00002f, 1e-6f, 1.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_08)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_08)   /* 표준 구간 */
 {
-    ttc = {3.01f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(0.5f, 1.0f, 1.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -5.0f, EPS_F);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_09)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_09)   /* TTC_Brake 큰 값 10 */
 {
-    ego = makeEgo(0.49f);
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(5.0f, 10.0f, 11.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -5.0f, EPS_F);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_10)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_10)   /* -10.01 → clamp -10 */
 {
-    ego = makeEgo(0.5f);
-    ttc = {1.0f,2.0f,3.0f,0.0f};
-    AEB_Mode_e m = call();
-    EXPECT_TRUE(m == AEB_MODE_NORMAL || m == AEB_MODE_ALERT || m == AEB_MODE_BRAKE);
+    ttc = makeTtc(-0.001f, 1.0f, 2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -10.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_11)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_11)   /* -9.99 통과 */
 {
-    ttc = {99998.9f,1.0f,2.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(0.001f, 1.0f, 2.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -9.99f, 0.02f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_12)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_12)   /* -2.01 → clamp -2 */
 {
-    ttc.TTC = INF_TTC;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(1.598f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_13)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_13)   /* -1.99 → clamp -2 */
 {
-    ttc.TTC = -0.01f;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(1.602f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_14)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_14)   /* TTC= TTC_Brake -> 0 */
 {
-    ttc.TTC        = 1.0f;      //  >  TTC_Alert
-    ttc.TTC_Brake  = 0.0f;
-    ttc.TTC_Alert  = 0.5f;      //  Alert 경계보다 TTC를 크게
-    ttc.Relative_Speed = 10.0f;
-
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(2.0f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_15)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_15)   /* ±0.0001 민감도 → clamp -2 */
 {
-    ttc.TTC_Alert = 0.0f;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(2.0001f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_16)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_16)   /* TTC = FLT_MAX → clamp -2 */
 {
-    ttc.TTC = FLT_MAX;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(FLT_MAX, 1.0f, 2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_17)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_17)   /* TTC = FLT_MIN → -10 근접 */
 {
-    ttc = {FLT_MIN,1.0f,2.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(FLT_MIN, 1.0f, 2.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -10.0f, 0.01f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_18)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_18)   /* -10.01 clamp 상한 */
 {
-    ttc = { 2.0e-5f, 1.0e-5f, 1.0f, 12.0f };     // 0.00002 > 0.00001 ❌
-    ttc.TTC = 5.0e-6f;                           // 0.000005 ≤ 0.00001 ✔
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(-0.001f, 1.0f, 2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -10.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_19)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_19)   /* -1.99 clamp 하한 */
 {
-    ego = makeEgo(0.49f);
-    ttc = {0.499f,1.0f,2.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(1.8f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_BV_20)
+TEST_F(AebDecelTest, TC_AEB_DEC_BV_20)   /* Min_Brake_Decel 적용 */
 {
-    ttc = {1.0f,1.0f,2.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(1.8f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
 /*******************************************************************
  * 3) RA  (요구사항 분석) 20 TC
  ******************************************************************/
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_01)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_01)   { EXPECT_FLOAT_EQ(call(AEB_MODE_NORMAL), 0.0f); }
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_02)   { EXPECT_FLOAT_EQ(call(AEB_MODE_ALERT ), 0.0f); }
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_03)
 {
-    tgt.AEB_Target_ID = -1;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(1.0f,2.0f,3.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -5.0f, EPS_F);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_02)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_04)
 {
-    ttc = {2.5f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
+    ttc = makeTtc(2.5f,2.0f,3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_03)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_05)
 {
-    ttc = {1.0f,1.5f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(0.0f,1.0f,2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -10.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_04)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_06)
 {
-    tgt.AEB_Target_Situation = AEB_TARGET_CUT_IN;
-    ttc = {1.0f,1.5f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(3.0f,2.0f,3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_05)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_07)
 {
-    tgt.AEB_Target_Situation = AEB_TARGET_CUT_IN;
-    ttc = {2.5f,1.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
+    ttc = makeTtc(2.0f,2.0f,3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_06)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_08)
 {
-    tgt.AEB_Target_Situation = AEB_TARGET_CUT_OUT;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc = makeTtc(1.0f,2.0f,3.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -5.0f, EPS_F);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_07)
-{
-    ego = makeEgo(0.0f);
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_08)
-{
-    tgt.AEB_Target_ID = -1;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_09)
-{
-    ego = makeEgo(0.0f);
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_10)
-{
-    ttc.TTC_Alert = 0.0f;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_11)
-{
-    ego = makeEgo(0.3f);
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_12)
-{
-    tgt.AEB_Target_ID = -1;
-    ego = makeEgo(0.3f);
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_13)
-{
-    tgt.AEB_Target_Situation = AEB_TARGET_CUT_IN;
-    ttc = {0.5f,1.0f,2.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_14)
-{
-    ttc.TTC_Brake = -1.0f;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_15)
-{
-    ttc = {2.0f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_16)
-{
-    ttc = {3.0f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
-}
-
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_17)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_09)
 {
     ttc.TTC = NAN;
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_18)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_10)
 {
-    EXPECT_EQ(aeb_mode_selection(nullptr,&ego,&ttc), AEB_MODE_NORMAL);
+    ttc.TTC = -1.0f;
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_19)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_11)
 {
-    ego = makeEgo(0.3f);
-    ttc = {1.0f,1.0f,2.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
+    ttc.TTC_Brake = 0.0f;
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
 }
 
-TEST_F(AebModeSelTest, TC_AEB_MS_RA_20)
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_12)
 {
-    /* 상태 전이 시나리오: Normal→Alert→Brake */
-    // 1) Normal
-    ttc = {4.0f,2.0f,3.0f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_NORMAL);
-    // 2) Alert
-    ttc.TTC = 2.5f;
-    EXPECT_EQ(call(), AEB_MODE_ALERT);
-    // 3) Brake
-    ttc.TTC = 1.0f;
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);
+    ttc = makeTtc(0.5f,1e-6f,1.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_13)
+{
+    ttc.TTC_Brake = NAN;
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_14)
+{
+    ttc.TTC_Brake = -1.0f;
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_15)
+{
+    EXPECT_FLOAT_EQ(calculate_decel_for_aeb(AEB_MODE_BRAKE, nullptr), 0.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_16)
+{
+    ttc = makeTtc(0.0f,0.0f,0.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), 0.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_17)
+{
+    ttc = makeTtc(1.0f,2.0f,3.0f);
+    EXPECT_NEAR(call(AEB_MODE_BRAKE), -5.0f, EPS_F);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_18)
+{
+    ttc = makeTtc(-0.001f,1.0f,2.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -10.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_19)
+{
+    ttc = makeTtc(1.8f,2.0f,3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
+}
+
+TEST_F(AebDecelTest, TC_AEB_DEC_RA_20)
+{
+    ttc = makeTtc(1.8f,2.0f,3.0f);
+    EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
 /*******************************************************************

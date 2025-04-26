@@ -272,29 +272,29 @@ ego_vehicle_estimation.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/ego_vehicle_estimation.c.s
 .PHONY : ego_vehicle_estimation.c.s
 
-ego_vehicle_estimation_EQ_test.obj: ego_vehicle_estimation_EQ_test.cpp.obj
-.PHONY : ego_vehicle_estimation_EQ_test.obj
+ego_vehicle_estimation_BV_test.obj: ego_vehicle_estimation_BV_test.cpp.obj
+.PHONY : ego_vehicle_estimation_BV_test.obj
 
 # target to build an object file
-ego_vehicle_estimation_EQ_test.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_EQ_test.cpp.obj
-.PHONY : ego_vehicle_estimation_EQ_test.cpp.obj
+ego_vehicle_estimation_BV_test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_BV_test.cpp.obj
+.PHONY : ego_vehicle_estimation_BV_test.cpp.obj
 
-ego_vehicle_estimation_EQ_test.i: ego_vehicle_estimation_EQ_test.cpp.i
-.PHONY : ego_vehicle_estimation_EQ_test.i
+ego_vehicle_estimation_BV_test.i: ego_vehicle_estimation_BV_test.cpp.i
+.PHONY : ego_vehicle_estimation_BV_test.i
 
 # target to preprocess a source file
-ego_vehicle_estimation_EQ_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_EQ_test.cpp.i
-.PHONY : ego_vehicle_estimation_EQ_test.cpp.i
+ego_vehicle_estimation_BV_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_BV_test.cpp.i
+.PHONY : ego_vehicle_estimation_BV_test.cpp.i
 
-ego_vehicle_estimation_EQ_test.s: ego_vehicle_estimation_EQ_test.cpp.s
-.PHONY : ego_vehicle_estimation_EQ_test.s
+ego_vehicle_estimation_BV_test.s: ego_vehicle_estimation_BV_test.cpp.s
+.PHONY : ego_vehicle_estimation_BV_test.s
 
 # target to generate assembly for a file
-ego_vehicle_estimation_EQ_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_EQ_test.cpp.s
-.PHONY : ego_vehicle_estimation_EQ_test.cpp.s
+ego_vehicle_estimation_BV_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/ego_vehicle_estimation_BV_test.cpp.s
+.PHONY : ego_vehicle_estimation_BV_test.cpp.s
 
 # Help Target
 help:
@@ -318,9 +318,9 @@ help:
 	@echo ... ego_vehicle_estimation.obj
 	@echo ... ego_vehicle_estimation.i
 	@echo ... ego_vehicle_estimation.s
-	@echo ... ego_vehicle_estimation_EQ_test.obj
-	@echo ... ego_vehicle_estimation_EQ_test.i
-	@echo ... ego_vehicle_estimation_EQ_test.s
+	@echo ... ego_vehicle_estimation_BV_test.obj
+	@echo ... ego_vehicle_estimation_BV_test.i
+	@echo ... ego_vehicle_estimation_BV_test.s
 .PHONY : help
 
 

@@ -4,29 +4,11 @@
 #include "ego_vehicle_estimation.h"
 #include "adas_shared.h"
 
-namespace {
-    inline float DegNorm(float h)                  // wrap to [‑180,180]
-    {
-        while (h >  180.f) h -= 360.f;
-        while (h < -180.f) h += 360.f;
-        return h;
-    }
-    
-    inline float DtSeconds(float now_ms, float prev_ms)
-    {
-        // All TimeData fields are milli‑seconds → convert to seconds
-        float dt_ms = now_ms - prev_ms;
-        // Requirement: if dt_ms < 10 ms  → force 10 ms (= 0.01 s)
-        if (dt_ms < 10.f) dt_ms = 10.f;
-        return dt_ms / 1000.f;
-    }
- }
-
 /*--------------------------------------------------
  * GTest Fixture
  *------------------------------------------------*/
 static const int KF_DIM = 5;
-class EgoVehicleEstimationTest : public ::testing::Test {
+class EgoVehicleEstimationTestBV : public ::testing::Test {
 protected:
     TimeData_t timeData;
     GPSData_t  gpsData;
@@ -41,35 +23,50 @@ protected:
         std::memset(&egoData, 0, sizeof(egoData));
         InitEgoVehicleKFState(&kfState);
 
-        // KF 상태 벡터 초기값 (예시)
-        kfState.X[0] = 10.0f; // vx
-        kfState.X[1] = 0.0f;  // vy
-        kfState.X[2] = 1.0f;  // ax
-        kfState.X[3] = 0.5f;  // ay
-        kfState.X[4] = 0.0f;  // heading
-        kfState.Previous_Update_Time = 900.0f;
+        // 예시로 KF 상태 벡터 및 시간을 임의 초기화
+        kfState.X[0] = 5.0f;   // vx
+        kfState.X[1] = 2.0f;   // vy
+        kfState.X[2] = 0.5f;   // ax
+        kfState.X[3] = 0.2f;   // ay
+        kfState.X[4] = 0.0f;   // heading
+        kfState.Previous_Update_Time = 900.0f; // 이전 업데이트 시각 [ms]
+
+        // 스파이크 검출용 이전 IMU / GPS 값을 임의 설정
+        kfState.Prev_Accel_X  = 1.0f;
+        kfState.Prev_Accel_Y  = 0.5f;
+        kfState.Prev_Yaw_Rate = 0.0f;
+        kfState.Prev_GPS_Vel_X = 0.0f;
+        kfState.Prev_GPS_Vel_Y = 0.0f;
     }
 };
 
 
 
-TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_41)
+/*─────────────────────────────────────────────────────────────────────────────
+ * TC_EGO_BV_41
+ *  Kalman Gain = 0.99 → 거의 전량 보정
+ *  (실제 코드 유도상황 세팅 필요. 여기선 단순 유추로 확인)
+ *────────────────────────────────────────────────────────────────────────────*/
+TEST_F(EgoVehicleEstimationTestBV, TC_EGO_BV_41)
 {
     InitEgoVehicleKFState(&kfState);
     kfState.Previous_Update_Time = 0.0f;
     timeData.Current_Time        = 1000.0f;
+    // 칼만게인을 0.99 근방으로 만들려면 관측오차 R 작게, P 크게 등 여러 조건 필요
+    // 여기서는 가정만 하고, 보정 결과가 거의 GPS값 쪽으로 끌려가면 통과
     gpsData.GPS_Timestamp = 995.0f;
-    gpsData.GPS_Velocity_X = 5.0f;
-    gpsData.GPS_Velocity_Y   = 0.0f;
-    imuData.Linear_Acceleration_X = 1.5f;
-    imuData.Linear_Acceleration_Y = 0.5f;
-    imuData.Yaw_Rate = 6.0f;
-
+    gpsData.GPS_Velocity_X = 20.0f;
+    gpsData.GPS_Velocity_Y = 0.0f;
+    kfState.Prev_GPS_Vel_X  = gpsData.GPS_Velocity_X;
+    kfState.Prev_GPS_Vel_Y  = gpsData.GPS_Velocity_Y;
+    imuData.Linear_Acceleration_X = 0.0f;
+    imuData.Linear_Acceleration_Y = 0.0f;
+    imuData.Yaw_Rate              = 0.0f;
     EgoVehicleEstimation(&timeData, &gpsData, &imuData, &egoData, &kfState);
-    EXPECT_NEAR(egoData.Ego_Velocity_X, 5.0f, 1.0f);
-    EXPECT_NEAR(egoData.Ego_Heading,    6.0f,  2.0f);
-}
 
+    // 거의 GPS 값으로 끌려옴
+    EXPECT_NEAR(egoData.Ego_Velocity_X, 20.0f, 0.5f);
+}
 /*--------------------------------------------------
  * main()
  *------------------------------------------------*/

@@ -1,9 +1,9 @@
 [
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\target_selection.c.obj -c C:\\Projects\\GoogleTestProject\\target_selection.c",
-  "file": "C:/Projects/GoogleTestProject/target_selection.c",
-  "output": "CMakeFiles/adas.dir/target_selection.c.obj"
+  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\acc.c.obj -c C:\\Projects\\GoogleTestProject\\acc.c",
+  "file": "C:/Projects/GoogleTestProject/acc.c",
+  "output": "CMakeFiles/adas.dir/acc.c.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build",

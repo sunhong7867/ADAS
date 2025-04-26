@@ -22,46 +22,37 @@ ACC_Mode_e acc_mode_selection(
     const Lane_Data_t       *pLaneData
 )
 {
-    /* 유효성 검사 (NULL 포인터 대비) */
-    if((pAccTargetData == NULL) || (pEgoData == NULL) || (pLaneData == NULL))
-    {
-        return ACC_MODE_SPEED; /* fallback */
-    }
+    if(!pAccTargetData || !pEgoData || !pLaneData) return ACC_MODE_SPEED;
+    if(pAccTargetData->ACC_Target_ID < 0)      return ACC_MODE_SPEED;
 
-    /* 1) 타겟 유효성 판단: ACC_Target_ID < 0 이면 타겟 없음 */
-    if(pAccTargetData->ACC_Target_ID < 0)
-    {
-        return ACC_MODE_SPEED;
-    }
-
-    /* 2) 거리 기반 모드 결정 */
     float dist = pAccTargetData->ACC_Target_Distance;
-    if(dist > 55.0f)
-    {
-        /* 전방 차량이 멀거나 없음 -> Speed 모드 */
+    if(dist > 55.0f) {
+        // 멀리 있으면 무조건 Speed
         return ACC_MODE_SPEED;
     }
-    else if(dist < 45.0f)
-    {
-        /* 전방 차량이 가까움 -> Distance 모드 */
-        return ACC_MODE_DISTANCE;
-    }
-    else
-    {
-        /* 45m <= dist <= 55m -> 이전 모드 유지 or 추가 조건 */
-        /* 설계서 예시:
-           - 만약 타겟 상태가 Stopped이고, Ego도 거의 정지면 Stop 모드
-           - 그 외엔 Speed */
-        if((pAccTargetData->ACC_Target_Status == ACC_TARGET_STOPPED) &&
-           (pEgoData->Ego_Velocity_X < 0.5f))
+    else if(dist < 45.0f) {
+        /* (추가) 45m 미만에서도 Stopped + Ego 정지이면 Stop 모드 */
+        if ((pAccTargetData->ACC_Target_Status == ACC_TARGET_STOPPED) &&
+            (pEgoData->Ego_Velocity_X < 0.5f))
         {
             return ACC_MODE_STOP;
         }
-
-        return ACC_MODE_SPEED; /* 기본값 */
+        return ACC_MODE_DISTANCE;
+    }
+    else {
+        // 중간 구간(45~55)에서만 STOP/CUT-IN 적용
+        if(pAccTargetData->ACC_Target_Status == ACC_TARGET_STOPPED &&
+           pEgoData->Ego_Velocity_X            < 0.5f)
+        {
+            return ACC_MODE_STOP;
+        }
+        if(pAccTargetData->ACC_Target_Situation == ACC_TARGET_CUT_IN) {
+            return ACC_MODE_DISTANCE;
+        }
+        // 디폴트
+        return ACC_MODE_SPEED;
     }
 }
-
 /**
  * @brief 2.2.4.1.2 거리 PID 계산
  */

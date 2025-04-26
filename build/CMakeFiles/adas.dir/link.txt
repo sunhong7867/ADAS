@@ -1,2 +1,2 @@
-C:\mingw64\bin\ar.exe qc libadas.a CMakeFiles/adas.dir/target_selection.c.obj
+C:\mingw64\bin\ar.exe qc libadas.a CMakeFiles/adas.dir/acc.c.obj
 C:\mingw64\bin\ranlib.exe libadas.a

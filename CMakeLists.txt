@@ -18,8 +18,8 @@ enable_testing()
 add_library(adas
     #ego_vehicle_estimation.c
 	#lane_selection.c
-	target_selection.c
-	#acc.c
+	#target_selection.c
+	acc.c
 	#aeb.c
 	#lfa.c
 	#arbitration.c

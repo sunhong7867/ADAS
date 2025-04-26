@@ -248,29 +248,29 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-target_selection.obj: target_selection.c.obj
-.PHONY : target_selection.obj
+acc.obj: acc.c.obj
+.PHONY : acc.obj
 
 # target to build an object file
-target_selection.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.obj
-.PHONY : target_selection.c.obj
+acc.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.obj
+.PHONY : acc.c.obj
 
-target_selection.i: target_selection.c.i
-.PHONY : target_selection.i
+acc.i: acc.c.i
+.PHONY : acc.i
 
 # target to preprocess a source file
-target_selection.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.i
-.PHONY : target_selection.c.i
+acc.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.i
+.PHONY : acc.c.i
 
-target_selection.s: target_selection.c.s
-.PHONY : target_selection.s
+acc.s: acc.c.s
+.PHONY : acc.s
 
 # target to generate assembly for a file
-target_selection.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.s
-.PHONY : target_selection.c.s
+acc.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.s
+.PHONY : acc.c.s
 
 test.obj: test.cpp.obj
 .PHONY : test.obj
@@ -315,9 +315,9 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... target_selection.obj
-	@echo ... target_selection.i
-	@echo ... target_selection.s
+	@echo ... acc.obj
+	@echo ... acc.i
+	@echo ... acc.s
 	@echo ... test.obj
 	@echo ... test.i
 	@echo ... test.s

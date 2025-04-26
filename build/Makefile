@@ -248,29 +248,29 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-acc.obj: acc.c.obj
-.PHONY : acc.obj
+aeb.obj: aeb.c.obj
+.PHONY : aeb.obj
 
 # target to build an object file
-acc.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.obj
-.PHONY : acc.c.obj
+aeb.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.obj
+.PHONY : aeb.c.obj
 
-acc.i: acc.c.i
-.PHONY : acc.i
+aeb.i: aeb.c.i
+.PHONY : aeb.i
 
 # target to preprocess a source file
-acc.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.i
-.PHONY : acc.c.i
+aeb.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.i
+.PHONY : aeb.c.i
 
-acc.s: acc.c.s
-.PHONY : acc.s
+aeb.s: aeb.c.s
+.PHONY : aeb.s
 
 # target to generate assembly for a file
-acc.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/acc.c.s
-.PHONY : acc.c.s
+aeb.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/aeb.c.s
+.PHONY : aeb.c.s
 
 test.obj: test.cpp.obj
 .PHONY : test.obj
@@ -315,9 +315,9 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... acc.obj
-	@echo ... acc.i
-	@echo ... acc.s
+	@echo ... aeb.obj
+	@echo ... aeb.i
+	@echo ... aeb.s
 	@echo ... test.obj
 	@echo ... test.i
 	@echo ... test.s

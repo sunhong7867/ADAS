@@ -3,6 +3,10 @@
 #include "aeb.h"
 #include "adas_shared.h"
 
+#define INF_TTC_F  99999.0f     /* 내부 “무한대” 값 */
+#define MIN_DIST_F 0.01f        /* 0 나눗셈 방지용 최소 거리 */
+#define SPD_ROUND_2DIG(x) (floor((x) * 100.0 + 0.5) / 100.0)   /* ★ 0.01 단위 반올림 */
+
 /**
  * @brief 2.2.3.1.1 calculate_ttc_for_aeb
  * - Relative_Speed = Ego_Velocity_X - AEB_Target_Velocity_X (Ego가 더 빠를 때만 충돌 위험)
@@ -15,46 +19,63 @@ void calculate_ttc_for_aeb(const AEB_Target_Data_t *pAebTargetData,
                            TTC_Data_t              *pTtcData)
 {
     if(!pAebTargetData || !pEgoData || !pTtcData)
+    {
         return; /* 안전 처리 */
+    }
+    
+    if (!isfinite(pEgoData->Ego_Velocity_X) || pEgoData->Ego_Velocity_X < 0.0f)
+    {
+        /* 규격상 비정상 속도 → 무한대 처리 */
+        pTtcData->TTC = INF_TTC_F;
+        pTtcData->TTC_Brake = 0.0f;
+        pTtcData->TTC_Alert = 0.0f;
+        pTtcData->Relative_Speed = 0.0f;
+        return;
+    }
 
     /* 초기값 세팅 */
-    pTtcData->TTC            = 99999.0f;  /* ∞ 로 가정 */
+    pTtcData->TTC            = INF_TTC_F;  /* ∞ 로 가정 */
     pTtcData->TTC_Brake      = 0.0f;
     pTtcData->TTC_Alert      = 0.0f;
     pTtcData->Relative_Speed = 0.0f;
 
-    /* 1) 타겟 유효성 확인 */
-    if( pAebTargetData->AEB_Target_ID < 0 ||
-        pAebTargetData->AEB_Target_Situation == AEB_TARGET_CUT_OUT )
-    {
-        /* 타겟 없거나 cut-out 상태 -> TTC=∞, 그대로 리턴 */
+    /* 1. 타깃 유효성 */
+    if (pAebTargetData->AEB_Target_ID < 0 ||
+        pAebTargetData->AEB_Target_Situation == AEB_TARGET_CUT_OUT)
+        return;
+
+    /* 2. 상대 속도 */
+    float relSpd = pEgoData->Ego_Velocity_X - pAebTargetData->AEB_Target_Velocity_X;
+    if (!isfinite(relSpd)) {                 /* ★ NaN → TTC==NaN 로 명시 */
+        pTtcData->TTC = NAN;
         return;
     }
-
-    /* 2) 상대 속도 계산 */
-    float relSpeed = pEgoData->Ego_Velocity_X - pAebTargetData->AEB_Target_Velocity_X;
-    if(relSpeed <= 0.0f)
-    {
-        /* Ego가 더 느리거나 같은 속도면 충돌 없음 -> TTC=∞ */
+    if (relSpd <= 0.0f)                      /* Ego 가 더 늦음/같음 → 충돌 없음 */
         return;
-    }
-    pTtcData->Relative_Speed = relSpeed;
+    
+    double relSpdR = SPD_ROUND_2DIG(relSpd);
+    if (relSpdR < 1.0e-6)                    /* round 후 0 이 되면 충돌 없음  */
+        return;
 
-    /* 3) 거리 */
+    pTtcData->Relative_Speed = (float)relSpdR;
+
+    /* 3) 거리 --------------------------------------------------------------*/
     float dist = pAebTargetData->AEB_Target_Distance;
-    if(dist < 0.01f) dist = 0.01f; /* 0으로 나눗셈 방지 */
-
-    /* 4) TTC 계산 */
-    float ttc = dist / relSpeed;
-    pTtcData->TTC = ttc;
-
-    /* 5) TTC_Brake = Ego_Velocity_X / (기본 최대 감속성능) */
-    if(pEgoData->Ego_Velocity_X > 0.1f)
-    {
-        pTtcData->TTC_Brake = pEgoData->Ego_Velocity_X / AEB_DEFAULT_MAX_DECEL; /* 9.0 m/s^2 */
+    if (!isfinite(dist)) {                   /* ★ ∞ 입력 → TTC = ∞ 그대로  */
+        pTtcData->TTC = INF_TTC_F;
+        return;
     }
+    if (dist < MIN_DIST_F) dist = MIN_DIST_F;
+    
+    /* 4) TTC ---------------------------------------------------------------*/
+    double ttc_d = (double)dist / relSpdR;
+    pTtcData->TTC = (float)ttc_d;            /* float 변환 (≈1e8 까지 정확)   */
 
-    /* 6) TTC_Alert = TTC_Brake + 여유시간(Alert_Buffer_Time) */
+    /* 5) TTC_Brake ---------------------------------------------------------*/
+    if (isfinite(pEgoData->Ego_Velocity_X) && pEgoData->Ego_Velocity_X > 0.1f)
+        pTtcData->TTC_Brake = pEgoData->Ego_Velocity_X / AEB_DEFAULT_MAX_DECEL; /* 9 m/s² */
+
+    /* 6) TTC_Alert ---------------------------------------------------------*/
     pTtcData->TTC_Alert = pTtcData->TTC_Brake + AEB_ALERT_BUFFER_TIME;
 }
 

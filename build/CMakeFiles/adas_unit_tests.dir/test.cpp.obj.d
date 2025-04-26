@@ -261,4 +261,6 @@ CMakeFiles/adas_unit_tests.dir/test.cpp.obj: \
  C:/mingw64/include/c++/13.3.0/tr1/poly_hermite.tcc \
  C:/mingw64/include/c++/13.3.0/tr1/poly_laguerre.tcc \
  C:/mingw64/include/c++/13.3.0/tr1/riemann_zeta.tcc \
+ C:\Projects\GoogleTestProject\adas_shared.h \
+ C:/mingw64/lib/gcc/x86_64-w64-mingw32/13.3.0/include/stdbool.h \
  C:\Projects\GoogleTestProject\acc.h

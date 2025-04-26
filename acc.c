@@ -76,31 +76,38 @@ float calculate_accel_for_distance_pid(
     }
 
     /* Delta Time 계산 (예: current_time ms단위 가정) */
-    float deltaTime = current_time - s_prevTimeDistance;
-    if(deltaTime < 0.0f)  deltaTime = 0.01f; /* fallback */
+    float deltaTime_s = (current_time - s_prevTimeDistance) / 1000.0f;
+    if(deltaTime_s <= 0.0f) deltaTime_s = 0.01f;
     s_prevTimeDistance = current_time;
 
     /* 기준거리 = 40m (설계서에서) */
     float targetDist = 40.0f;
-    float distErr    = targetDist - pAccTargetData->ACC_Target_Distance;
+    float distErr    = pAccTargetData->ACC_Target_Distance - targetDist;
 
     /* PID Gains */
     float Kp = 0.4f, Ki = 0.05f, Kd = 0.1f;
 
-    s_distIntegral     += distErr * deltaTime;
-    float dErr          = (distErr - s_distPrevError) / (deltaTime + 1e-5f);
-    s_distPrevError     = distErr;
+    s_distIntegral += distErr * deltaTime_s;
+    float dErr      = (distErr - s_distPrevError) / deltaTime_s;
+    s_distPrevError = distErr;
 
-    float accelDist = (Kp * distErr) + (Ki * s_distIntegral) + (Kd * dErr);
+    float accelDist = Kp*distErr + Ki*s_distIntegral + Kd*dErr;
+
+    if(accelDist > 10.0f)  accelDist = 10.0f;
+    if(accelDist < -10.0f) accelDist = -10.0f;
 
     /* Stop 모드의 경우 (정지 유지) / Stopped 타겟과 ego도 거의 0이면 강제 제동 */
-    if((pAccTargetData->ACC_Target_Status == ACC_TARGET_STOPPED) &&
-       (pEgoData->Ego_Velocity_X < 0.5f))
-    {
-        /* -3.0 => 강제정지 */
-        accelDist = -3.0f;
+    if(accMode == ACC_MODE_STOP) {
+        if (pAccTargetData->ACC_Target_Status == ACC_TARGET_STOPPED &&
+            pEgoData->Ego_Velocity_X        < 0.5f)
+        {
+            if (pAccTargetData->ACC_Target_Velocity_X > 0.5f) {
+                accelDist = 1.2f;          /* 재출발 */
+            } else {
+                accelDist = -3.0f;         /* 정지 유지 */
+            }
+        }
     }
-
     return accelDist;
 }
 

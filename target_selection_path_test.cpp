@@ -346,8 +346,9 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_18)
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_19)
 {
     // vx>0, vy>0 => cutin조건 충족
+    filteredList[0].Filtered_Position_Y = 0.0f;
     filteredList[0].Filtered_Velocity_X=5.0f;
-    filteredList[0].Filtered_Velocity_Y=0.5f;
+    filteredList[0].Filtered_Velocity_Y=0.2f;
     int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
     EXPECT_EQ(outCount,1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
@@ -359,12 +360,13 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_EQ_20)
     // lateral offset=0.8 => cutin true
     // offset 계산은 predict에서 (y - lsData.LS_Lane_Offset)?
     // 여기선 0.8 => within threshold=0.85 => cutin= true
-    filteredList[0].Filtered_Position_Y=0.8f; 
-    filteredList[0].Filtered_Velocity_X=1.0f; 
-    filteredList[0].Filtered_Velocity_Y=0.3f; 
+    filteredList[0].Filtered_Position_Y = 0.25f;   // y0
+    filteredList[0].Filtered_Velocity_X = 1.0f;    // vx ≥ 0.5
+    filteredList[0].Filtered_Velocity_Y = 0.2f;    // vy ≥ 0.2
 
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
 }
 
@@ -383,18 +385,24 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_01)
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_02)
 {
     // vx=0.50 => cutin=true
-    filteredList[0].Filtered_Velocity_X=0.50f;
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 0.0f;   // lateral 0
+    filteredList[0].Filtered_Velocity_X = 0.50f;  // 경계값
+    filteredList[0].Filtered_Velocity_Y = 0.20f;  // 경계값
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
 }
 
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_03)
 {
     // vx=0.51 => cutin=true
-    filteredList[0].Filtered_Velocity_X=0.51f;
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 0.0f;
+    filteredList[0].Filtered_Velocity_X = 0.51f;
+    filteredList[0].Filtered_Velocity_Y = 0.20f;
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
 }
 
@@ -410,40 +418,51 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_04)
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_05)
 {
     // vy=0.20 => cutin=true
-    filteredList[0].Filtered_Velocity_Y=0.20f;
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 0.0f;
+    filteredList[0].Filtered_Velocity_X = 0.50f;  // vx도 경계 이상으로 설정
+    filteredList[0].Filtered_Velocity_Y = 0.20f;  // 경계값
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
 }
 
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_06)
 {
     // vy=0.21 => cutin=true
-    filteredList[0].Filtered_Velocity_Y=0.21f;
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 0.0f;
+    filteredList[0].Filtered_Velocity_X = 0.50f;
+    filteredList[0].Filtered_Velocity_Y = 0.21f;
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
 }
 
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_07)
 {
     // lateral=0.84 => cutin
-    filteredList[0].Filtered_Position_Y=0.84f;
-    filteredList[0].Filtered_Velocity_X=0.6f;
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 0.10f;  // y0
+    filteredList[0].Filtered_Velocity_X = 0.60f;  // vx ≥ 0.5
+    filteredList[0].Filtered_Velocity_Y = 0.20f;  // vy ≥ 0.2 → Predicted_Y = 0.10 + 0.20*3 = 0.70
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
 }
 
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_08)
 {
     // lateral=0.85 => cutin
-    filteredList[0].Filtered_Position_Y=0.85f;
-    filteredList[0].Filtered_Velocity_X=0.6f;
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 0.25f;  // y0
+    filteredList[0].Filtered_Velocity_X = 0.60f;  // vx ≥ 0.5
+    filteredList[0].Filtered_Velocity_Y = 0.20f;  // vy ≥ 0.2 → Predicted_Y = 0.25 + 0.20*3 = 0.85
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
 }
+
 
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_09)
 {
@@ -467,18 +486,24 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_10)
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_11)
 {
     // lateral=3.50 => cutout=true (경계)
-    filteredList[0].Filtered_Position_Y=3.50f;
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 3.50f;
+    filteredList[0].Filtered_Velocity_X = 0.60f;  // vx irrelevant
+    filteredList[0].Filtered_Velocity_Y = 0.30f;  // vy ≥ 0.2
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutOut_Flag);
 }
 
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_12)
 {
     // lateral=3.51 => cutout=true
-    filteredList[0].Filtered_Position_Y=3.51f;
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 3.51f;
+    filteredList[0].Filtered_Velocity_X = 0.60f;
+    filteredList[0].Filtered_Velocity_Y = 0.30f;
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutOut_Flag);
 }
 
@@ -486,11 +511,12 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_BV_13)
 {
     // CutIn_Threshold=0.85
     // 여기선 상수만 확인 => pass if code uses 0.85
-    filteredList[0].Filtered_Velocity_X=1.0f; 
-    filteredList[0].Filtered_Position_Y=0.85f; 
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
-    // check
+    filteredList[0].Filtered_Position_Y = 0.25f;   // y0
+    filteredList[0].Filtered_Velocity_X   = 1.0f;    // vx ≥ 0.5
+    filteredList[0].Filtered_Velocity_Y   = 0.20f;   // vy ≥ 0.2
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutIn_Flag);
 }
 
@@ -682,9 +708,12 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_RA_09)
 TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_RA_10)
 {
     // Cut-out 판단 시 거리 무관 -> lateral만
-    filteredList[0].Filtered_Position_Y=4.0f; // large offset
-    int outCount=callPredictPath(filteredList,1,&laneWp,&lsData,predList,50);
-    EXPECT_EQ(outCount,1);
+    filteredList[0].Filtered_Position_Y = 4.0f;   // 충분히 큰 lateral
+    filteredList[0].Filtered_Velocity_X = 0.0f;
+    filteredList[0].Filtered_Velocity_Y = 0.2f;   // vy ≥ 0.2(필수)
+
+    int outCount = callPredictPath(filteredList, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 1);
     EXPECT_TRUE(predList[0].CutOut_Flag);
 }
 

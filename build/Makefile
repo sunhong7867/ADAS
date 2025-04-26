@@ -248,53 +248,53 @@ gtest_main/fast:
 	$(MAKE) $(MAKESILENT) -f googletest\googletest\CMakeFiles\gtest_main.dir\build.make googletest/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
-lane_selection.obj: lane_selection.c.obj
-.PHONY : lane_selection.obj
+target_selection.obj: target_selection.c.obj
+.PHONY : target_selection.obj
 
 # target to build an object file
-lane_selection.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lane_selection.c.obj
-.PHONY : lane_selection.c.obj
+target_selection.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.obj
+.PHONY : target_selection.c.obj
 
-lane_selection.i: lane_selection.c.i
-.PHONY : lane_selection.i
+target_selection.i: target_selection.c.i
+.PHONY : target_selection.i
 
 # target to preprocess a source file
-lane_selection.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lane_selection.c.i
-.PHONY : lane_selection.c.i
+target_selection.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.i
+.PHONY : target_selection.c.i
 
-lane_selection.s: lane_selection.c.s
-.PHONY : lane_selection.s
+target_selection.s: target_selection.c.s
+.PHONY : target_selection.s
 
 # target to generate assembly for a file
-lane_selection.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/lane_selection.c.s
-.PHONY : lane_selection.c.s
+target_selection.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas.dir\build.make CMakeFiles/adas.dir/target_selection.c.s
+.PHONY : target_selection.c.s
 
-lane_selection_test.obj: lane_selection_test.cpp.obj
-.PHONY : lane_selection_test.obj
+test.obj: test.cpp.obj
+.PHONY : test.obj
 
 # target to build an object file
-lane_selection_test.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.obj
-.PHONY : lane_selection_test.cpp.obj
+test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/test.cpp.obj
+.PHONY : test.cpp.obj
 
-lane_selection_test.i: lane_selection_test.cpp.i
-.PHONY : lane_selection_test.i
+test.i: test.cpp.i
+.PHONY : test.i
 
 # target to preprocess a source file
-lane_selection_test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.i
-.PHONY : lane_selection_test.cpp.i
+test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/test.cpp.i
+.PHONY : test.cpp.i
 
-lane_selection_test.s: lane_selection_test.cpp.s
-.PHONY : lane_selection_test.s
+test.s: test.cpp.s
+.PHONY : test.s
 
 # target to generate assembly for a file
-lane_selection_test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/lane_selection_test.cpp.s
-.PHONY : lane_selection_test.cpp.s
+test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\adas_unit_tests.dir\build.make CMakeFiles/adas_unit_tests.dir/test.cpp.s
+.PHONY : test.cpp.s
 
 # Help Target
 help:
@@ -315,12 +315,12 @@ help:
 	@echo ... gmock_main
 	@echo ... gtest
 	@echo ... gtest_main
-	@echo ... lane_selection.obj
-	@echo ... lane_selection.i
-	@echo ... lane_selection.s
-	@echo ... lane_selection_test.obj
-	@echo ... lane_selection_test.i
-	@echo ... lane_selection_test.s
+	@echo ... target_selection.obj
+	@echo ... target_selection.i
+	@echo ... target_selection.s
+	@echo ... test.obj
+	@echo ... test.i
+	@echo ... test.s
 .PHONY : help
 
 

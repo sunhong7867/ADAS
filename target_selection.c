@@ -35,7 +35,7 @@ int select_target_from_object_list(const ObjectData_t *pObjList,
 
     /* 곡선 차로 보정 계수 */
     float Heading_Error_Coeff = 0.05f;
-    float Adjusted_Lateral_Threshold = pLsData->LS_Lane_Width;
+    float Adjusted_Lateral_Threshold = pLsData->LS_Lane_Width * 0.5f;
 
     if (pLsData->LS_Is_Curved_Lane) {
         /* 곡선이면 차선 너비 + (fabs(Heading_Error) * 계수) */
@@ -101,15 +101,15 @@ int select_target_from_object_list(const ObjectData_t *pObjList,
             Base_CellNumber = 1 + (int)(Adjusted_Object_Distance / 10.0f);
             if (Base_CellNumber > 6)  Base_CellNumber = 6;
         }
-        else if (Adjusted_Object_Distance <= 120.0f) {
+        else if (Adjusted_Object_Distance < 120.0f) {
             float x = Adjusted_Object_Distance - 60.0f;
             Base_CellNumber = 7 + (int)(x / 10.0f);
             if (Base_CellNumber > 12) Base_CellNumber = 12;
         }
         else {
             float x = Adjusted_Object_Distance - 120.0f;
-            Base_CellNumber = 13 + (int)(x / 10.0f);
-            if (Base_CellNumber > 20) Base_CellNumber = 20;
+            int delta = (int)floorf(x/10.0f);   // floorf 사용
+            Base_CellNumber = 13 + delta;
         }
 
         /* 횡방향 위치 보정 offset => -1, 0, +1 */

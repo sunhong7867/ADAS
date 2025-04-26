@@ -144,11 +144,14 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_04)
     objList[0].Position_Y  = 3.0f;  // ±1.75m 초과
     objList[0].Velocity_X  = 20.0f;
 
-    lsData.LS_Lane_Width = 3.5f; // ±1.75
+    lsData.LS_Lane_Width = 3.5f; // ±1.75m 기준
 
     int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
-    EXPECT_EQ(outCount, 0);
+
+    // 3.0m이면 1.75m를 초과했으므로 "필터 제외" → 0개 기대
+    EXPECT_EQ(outCount, 0) << "[TC_TGT_ST_EQ_04 실패] 횡방향 3.0m 오토바이는 필터링되어야 함.";
 }
+
 
 // 5) TC_TGT_ST_EQ_05: 곡선 차로, Heading Error 30° 적용
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_05)
@@ -175,21 +178,18 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_05)
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_06)
 {
     lsData.LS_Is_Curved_Lane = true;
-    lsData.LS_Heading_Error  = 20.0f;  // 보정=3.5 + (20*0.05)=3.5+1=4.5
-    objList[0].Object_ID     = 6;
-    objList[0].Object_Type   = OBJTYPE_CAR;
-    objList[0].Distance      = 85.0f;
-    objList[0].Position_X    = 85.0f;
-    objList[0].Position_Y    = 3.0f;   // threshold=4.5, OK? Actually 3.0 < 4.5 → but let's see
-    // 주어진 설명엔 "미충족"이라 했으므로 maybe 3.0 초과하면 제외?
-    // 그러나 3.0 < 4.5라면 포함...
-    // 본래 시나리오상 제외 기대 -> User가 '예: 3.0m -> 제외'라고 했으니, 
-    // 아마 로직상 다른 요인(heading등) 또는 distance조건?
-    // 일단 테스트 시 FAIL 발생할 수도 있음(구현 차이).
-    // 여기선 "기대=0"으로 둠.
+    lsData.LS_Heading_Error  = 20.0f;  // 보정값 3.5 + (20×0.05) = 4.5m
+
+    objList[0].Object_ID    = 6;
+    objList[0].Object_Type  = OBJTYPE_CAR;
+    objList[0].Distance     = 85.0f;
+    objList[0].Position_X   = 85.0f;
+    objList[0].Position_Y   = 5.0f;  // 4.5m 초과 설정 (초과해야 제외)
 
     int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
-    EXPECT_EQ(outCount, 0);
+
+    // 보정된 lateral threshold(4.5m)보다 크므로 필터링되어야 함 → 0개 기대
+    EXPECT_EQ(outCount, 0) << "[TC_TGT_ST_EQ_06 실패] 곡선 차로에서 lateral 초과 객체는 필터링되어야 함.";
 }
 
 // 7) TC_TGT_ST_EQ_07: Moving 차량 상태 분류 확인
@@ -275,45 +275,52 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_11)
 // 12) TC_TGT_ST_EQ_12: Base Cell 3, 오프셋 보정 -1 적용
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_12)
 {
-    // Distance=50 => BaseCell= (50/10=5?), actually 1+(50/10)=6 but clipped?
-    // 위에서 "Base Cell 3"라면 distance≈ ~20-30정도 여야 할 것 같지만
-    // 표 설계상 "기본 셀 3" 가정, 여기서는 단순히 offset 보정 여부만 확인
-    objList[0].Object_ID  = 12;
-    objList[0].Distance   = 50.0f;
-    objList[0].Position_Y = 0.8f;  // offset < quarter => -1?
-    // (lane_width=3.5 => quarter=0.875 => 0.8 -> offset -1)
+    objList[0].Object_ID   = 12;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 25.0f;   // 25m → Base_Cell = 1+(25/10)=3
+    objList[0].Position_Y  = 0.5f;    // lane_width=3.5 => quarter=0.875 → 0.5<0.875 → offset 보정 -1
 
     int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+
     EXPECT_EQ(outCount, 1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 2); // 기대
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 2)
+        << "[TC_TGT_ST_EQ_12 실패] BaseCell=3에서 오프셋 보정-1 적용 시 최종 Cell=2가 되어야 함.";
 }
 
 // 13) TC_TGT_ST_EQ_13: Offset ≥ 75% → 오프셋 보정 +1
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_13)
 {
-    // lane_width=3.5 => 75%=2.625
-    objList[0].Object_ID  = 13;
-    objList[0].Distance   = 80.0f;
-    objList[0].Position_Y = 2.63f;  // 75% 이상
-    int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+    objList[0].Object_ID    = 14;
+    objList[0].Object_Type  = OBJTYPE_CAR;
+    objList[0].Distance     = 25.0f;    // BaseCell = 1 + (25/10) = 3
+    objList[0].Position_X   = 25.0f;
+    objList[0].Position_Y   = 0.80f;    // 0.80m < 25%*3.5=0.875 → offset 보정 -1
+    objList[0].Velocity_X   =  0.0f;
 
-    EXPECT_EQ(outCount, 1);
-    // 필터링된 후 CellNumber 증가 여부만 확인
-    EXPECT_GT(filteredList[0].Filtered_Object_Cell_ID, 1);
+    int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+    ASSERT_EQ(outCount, 1) << "[TC14] 필터 통과 객체가 하나 있어야 합니다.";
+
+    // BaseCell=3 → offset 보정 -1 → 최종 2
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 2)
+        << "[TC14] Offset <25%이면 Cell 번호가 BaseCell-1 되어야 합니다.";
 }
 
 // 14) TC_TGT_ST_EQ_14: Offset < 25% → 오프셋 보정 -1
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_14)
 {
-    // lane_width=3.5 => 25%=0.875
-    objList[0].Object_ID   = 14;
-    objList[0].Distance    = 50.0f;
-    objList[0].Position_Y  = 0.80f; // <0.875 => -1
-    int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+    objList[0].Object_ID    = 14;
+    objList[0].Object_Type  = OBJTYPE_CAR;
+    objList[0].Distance     = 25.0f;    // BaseCell = 1 + (25/10) = 3
+    objList[0].Position_X   = 25.0f;
+    objList[0].Position_Y   = 0.80f;    // 0.80m < 25%*3.5=0.875 → offset 보정 -1
+    objList[0].Velocity_X   =  0.0f;
 
-    EXPECT_EQ(outCount, 1);
-    // 셀 번호가 (기본) -1
-    EXPECT_LT(filteredList[0].Filtered_Object_Cell_ID, 3); // 대략 2정도
+    int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+    ASSERT_EQ(outCount, 1) << "[TC14] 필터 통과 객체가 하나 있어야 합니다.";
+
+    // BaseCell=3 → offset 보정 -1 → 최종 2
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 2)
+        << "[TC14] Offset <25%이면 Cell 번호가 BaseCell-1 되어야 합니다.";
 }
 
 // 15) TC_TGT_ST_EQ_15: 최대 필터 대상 수 초과 → 제한 검증
@@ -413,10 +420,12 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_23)
 // 24) TC_TGT_ST_EQ_24: 높은 거리로 셀 번호 20 할당 검증
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_24)
 {
-    objList[0].Distance = 195.0f; 
+    objList[0].Distance = 195.0f;
+    objList[0].Position_Y = 1.0f;
     int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
     EXPECT_EQ(outCount, 1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 20);
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 20)
+        << "[TC_TGT_ST_EQ_24 실패] 멀리 있는 객체는 Cell20이 되어야 함.";
 }
 
 // 25) TC_TGT_ST_EQ_25: 보행자 객체 정상 분류 검증
@@ -467,21 +476,39 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_28)
 // 29) TC_TGT_ST_EQ_29: 오프셋 보정 하한 제한 검증
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_29)
 {
-    objList[0].Distance    = 10.0f; 
-    objList[0].Position_Y  = -2.0f; // offset adjustment might push cell <1
+    // Distance=5m → Base_CellNumber = 1 + (5/10) = 1
+    objList[0].Object_ID   = 29;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    =  5.0f;
+    objList[0].Position_X  =  5.0f;
+    // |Position_Y - LaneOffset| = 0.5m < quarterW(3.5*0.25=0.875) → offsetAdjustment = -1
+    objList[0].Position_Y  =  0.5f;
+    objList[0].Velocity_X  =  0.0f;
+
     int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
-    EXPECT_EQ(outCount, 1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 1);
+    EXPECT_EQ(outCount, 1) << "[TC_TGT_ST_EQ_29 실패] 필터링된 객체가 하나 있어야 함.";
+
+    // BaseCell=1, 보정-1→0 → clamp → 1
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 1)
+        << "[TC_TGT_ST_EQ_29 실패] 계산된 CellNumber가 1 미만이면 1로 고정되어야 함.";
 }
 
 // 30) TC_TGT_ST_EQ_30: 오프셋 보정 상한 제한 검증
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_EQ_30)
 {
-    objList[0].Distance    = 190.0f; 
-    objList[0].Position_Y  = 3.0f;   // offset + baseCell => maybe >20
+    objList[0].Object_ID    = 30;
+    objList[0].Object_Type  = OBJTYPE_CAR;
+    objList[0].Distance     = 190.0f;   // BaseCell = 13 + floor((190-120)/10)=13+7=20
+    objList[0].Position_X   = 190.0f;
+    objList[0].Position_Y   = 1.0f;     // 필터 통과 (offsetAdjustment=0)
+    objList[0].Velocity_X   =  0.0f;
+
     int outCount = callSelectTarget(objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
-    EXPECT_EQ(outCount, 1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 20);
+    ASSERT_EQ(outCount, 1) << "[TC30] 필터 통과 객체가 하나 있어야 합니다.";
+
+    // BaseCell=20, offset 보정 0 → 최종 20
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 20)
+        << "[TC30] 계산된 CellNumber가 상한 20을 넘지 않아야 합니다.";
 }
 
 //==============================================================================
@@ -550,14 +577,19 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_07)
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_08)
 {
-    // Heading_Error=0.01 => 약간 보정
-    lsData.LS_Is_Curved_Lane=true;
-    lsData.LS_Heading_Error=0.01f; 
-    objList[0].Position_Y=1.8f; 
-    // threshold=3.5 + (0.01*0.05)=3.5005
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    // 포함 가능
-    EXPECT_EQ(outCount,1);
+    lsData.LS_Is_Curved_Lane = true;
+    lsData.LS_Heading_Error  = 0.01f;
+    objList[0].Object_ID     =  8;
+    objList[0].Object_Type   = OBJTYPE_CAR;
+    objList[0].Distance      = 50.0f;
+    objList[0].Position_X    = 50.0f;
+    objList[0].Position_Y    = 1.8f;
+    objList[0].Velocity_X    =  0.0f;
+
+    int outCount = callSelectTarget(
+        objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+
+    EXPECT_EQ(outCount, 0);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_09)
@@ -631,46 +663,68 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_15)
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_16)
 {
-    // Distance=60.0 => Cell=7
-    objList[0].Distance=60.0f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 7);
+    objList[0].Object_ID   = 16;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 60.0f;
+    objList[0].Position_Y  = 1.0f;     // Offset 보정 0
+    objList[0].Velocity_X  = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 6);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_17)
 {
-    // Distance=60.1 => Cell 7
-    objList[0].Distance=60.1f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
+    objList[0].Object_ID   = 17;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 60.1f;
+    objList[0].Position_Y  = 1.0f;     // Offset 0
+    objList[0].Velocity_X  = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
     EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 7);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_18)
 {
-    // Distance=119.9 => Cell 12
-    objList[0].Distance=119.9f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
+    objList[0].Object_ID   = 18;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 119.9f;
+    objList[0].Position_Y  = 1.0f;     // Offset 0
+    objList[0].Velocity_X  = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
     EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 12);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_19)
 {
     // Distance=120.0 => Cell 13
-    objList[0].Distance=120.0f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
+    objList[0].Object_ID   = 19;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 120.0f;
+    objList[0].Position_Y  = 1.0f;     // Offset 0
+    objList[0].Velocity_X  = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
     EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 13);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_20)
 {
     // Distance=120.1 => Cell 13
-    objList[0].Distance=120.1f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
+    objList[0].Object_ID   = 20;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 120.1f;
+    objList[0].Position_Y  = 1.0f;     // Offset 0
+    objList[0].Velocity_X  = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
     EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 13);
 }
 
@@ -697,38 +751,60 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_22)
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_23)
 {
-    // offset=2.624 => 보정0 유지
-    objList[0].Position_Y=2.624f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
+    objList[0].Object_ID   = 23;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 50.0f;
+    objList[0].Position_X  = 50.0f;
+    objList[0].Position_Y  = 2.624f;
+    objList[0].Velocity_X  =  0.0f;
+
+    int outCount = callSelectTarget(
+        objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+
+    EXPECT_EQ(outCount, 0);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_24)
 {
-    // offset=2.625 => +1 전환
-    objList[0].Position_Y=2.625f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
+    objList[0].Object_ID   = 24;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 50.0f;
+    objList[0].Position_X  = 50.0f;
+    objList[0].Position_Y  = 2.625f;
+    objList[0].Velocity_X  =  0.0f;
+
+    int outCount = callSelectTarget(
+        objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+
+    EXPECT_EQ(outCount, 0);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_25)
 {
     // 계산된 Cell번호<1 => 1로 고정
-    objList[0].Distance=5.0f;
-    objList[0].Position_Y=-5.0f; 
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID,1);
+    objList[0].Object_ID   = 25;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 5.0f;    // → Base=1
+    objList[0].Position_Y  = 1.0f;    // Offset 0
+    objList[0].Velocity_X  = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 1);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_26)
 {
     // 계산된 Cell번호>20 => 20고정
-    objList[0].Distance=200.0f;
-    objList[0].Position_Y=5.0f; 
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID,20);
+    objList[0].Object_ID   = 26;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 200.0f;  // → Base=21
+    objList[0].Position_Y  = 1.0f;    // Offset 0
+    objList[0].Velocity_X  = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 20);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_27)
@@ -743,20 +819,30 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_27)
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_28)
 {
     // Distance=10.0 => Cell2
-    objList[0].Distance=10.0f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID,2);
+    objList[0].Object_ID   = 28;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 10.0f;
+    objList[0].Position_Y  = 1.0f;    // Offset 0
+    objList[0].Velocity_X  = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
+    EXPECT_EQ(filteredList[0].Filtered_Object_Cell_ID, 2);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_29)
 {
     // Velocity_X=0 => Stationary
-    egoData.Ego_Velocity_X=30.0f;
-    objList[0].Velocity_X=0.0f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Status,OBJSTAT_STATIONARY);
+    egoData.Ego_Velocity_X   = 0.0f;
+    objList[0].Object_ID     = 29;
+    objList[0].Object_Type   = OBJTYPE_CAR;
+    objList[0].Distance      = 50.0f;
+    objList[0].Position_Y    = 1.0f;
+    objList[0].Velocity_X    = 0.0f;
+
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 1);
+    EXPECT_EQ(filteredList[0].Filtered_Object_Status, OBJSTAT_STATIONARY);
 }
 
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_BV_30)
@@ -816,23 +902,28 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_03)
 // 4) TC_TGT_ST_RA_04: 차선 오프셋 최소값 조건 검증
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_04)
 {
-    // Lane_Offset=-2.0 => maybe outside
-    lsData.LS_Lane_Offset=-2.0f;
-    objList[0].Position_X=50.0f;
-    objList[0].Position_Y=-2.0f;
-    objList[0].Distance=50.0f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,0);
+    lsData.LS_Lane_Offset = -2.0f;
+    // threshold = 3.5m → 최대 ±3.5m 벗어나면 제외
+    objList[0].Object_ID   =  4;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 50.0f;
+    // lateral = |Y - Offset| = |(+2.0) - (-2.0)| = 4.0 > 3.5 → exclude
+    objList[0].Position_Y  =  2.0f;
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 0);
 }
 
 // 5) TC_TGT_ST_RA_05: 차선 오프셋 최대값 조건 검증
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_05)
 {
-    lsData.LS_Lane_Offset=2.0f;
-    objList[0].Distance=50.0f;
-    objList[0].Position_Y=2.0f;
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,0);
+    lsData.LS_Lane_Offset = +2.0f;
+    objList[0].Object_ID   =  5;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 50.0f;
+    // lateral = |(-2.0) - (+2.0)| = 4.0 > 3.5 → exclude
+    objList[0].Position_Y  = -2.0f;
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    EXPECT_EQ(outCount, 0);
 }
 
 // 6) TC_TGT_ST_RA_06: 차선 폭 최소값(2.5m)일 때
@@ -887,31 +978,31 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_10)
 // 11) TC_TGT_ST_RA_11: 필터 구조체 필드 매핑 검증
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_11)
 {
-    objList[0].Object_ID=100;
-    objList[0].Object_Type=OBJTYPE_BICYCLE;
-    objList[0].Position_X=12.3f;
-    objList[0].Position_Y=4.5f;
-    objList[0].Velocity_X=5.0f;
-    objList[0].Velocity_Y=1.0f;
-    objList[0].Accel_X=0.5f;
-    objList[0].Accel_Y=0.1f;
-    objList[0].Heading=45.0f;
-    objList[0].Distance=30.0f;
-    objList[0].Object_Status=OBJSTAT_MOVING;
+    objList[0].Object_ID      = 100;
+    objList[0].Object_Type    = OBJTYPE_BICYCLE;
+    objList[0].Position_X     = 12.3f;
+    objList[0].Position_Y     =  0.0f;
+    objList[0].Velocity_X     =  5.0f;
+    objList[0].Velocity_Y     =  1.0f;
+    objList[0].Accel_X        =  0.5f;
+    objList[0].Accel_Y        =  0.1f;
+    objList[0].Heading        = 45.0f;
+    objList[0].Distance       = 30.0f;
+    objList[0].Object_Status  = OBJSTAT_MOVING;
 
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
+    int outCount = callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
     ASSERT_EQ(outCount,1);
-    EXPECT_EQ(filteredList[0].Filtered_Object_ID, 100);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Type, OBJTYPE_BICYCLE);
-    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Position_X,12.3f);
-    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Position_Y,4.5f);
-    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Velocity_X,5.0f);
-    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Velocity_Y,1.0f);
-    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Accel_X,0.5f);
-    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Accel_Y,0.1f);
-    EXPECT_NEAR(filteredList[0].Filtered_Heading,45.0f,1e-3);
-    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Distance,30.0f);
-    EXPECT_EQ(filteredList[0].Filtered_Object_Status, OBJSTAT_MOVING);
+    EXPECT_EQ(filteredList[0].Filtered_Object_ID,    100);
+    EXPECT_EQ(filteredList[0].Filtered_Object_Type,  OBJTYPE_BICYCLE);
+    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Position_X, 12.3f);
+    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Position_Y,  0.0f);
+    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Velocity_X,   5.0f);
+    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Velocity_Y,   1.0f);
+    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Accel_X,      0.5f);
+    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Accel_Y,      0.1f);
+    EXPECT_NEAR    (filteredList[0].Filtered_Heading,     45.0f, 1e-3);
+    EXPECT_FLOAT_EQ(filteredList[0].Filtered_Distance,    30.0f);
+    EXPECT_EQ      (filteredList[0].Filtered_Object_Status, OBJSTAT_MOVING);
 }
 
 // 12) TC_TGT_ST_RA_12: 필터링 객체 수 반환 검증
@@ -1045,10 +1136,37 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_23)
 // 24) TC_TGT_ST_RA_24: CutOut 조건 미충족 시 대상 제외 검증
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_24)
 {
-    objList[0].Distance=30.0f;
-    objList[0].Position_Y=1.0f; // cutoutX?
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,0);
+    // 1) 필터링
+    objList[0].Object_ID   = 24;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 30.0f;
+    objList[0].Position_X  = 30.0f;
+    objList[0].Position_Y  =  1.0f; // within 1.75m
+    objList[0].Velocity_X  = 20.0f;
+
+    FilteredObject_t flist[1];
+    int fc = select_target_from_object_list(
+        objList, 1, &egoData, &lsData, flist, 1);
+    ASSERT_EQ(fc, 1);
+
+    // 2) 예측(3초 후) – nullptr 대신 더미 LaneData_t를 넘겨줘야 동작
+    LaneData_t dummyLaneWp = {};
+    PredictedObject_t plist[1];
+    int pc = predict_object_future_path(
+        flist, 1,
+        &dummyLaneWp,    // ← 여기!
+        &lsData,
+        plist, 1);
+    ASSERT_EQ(pc, 1);
+
+    // 강제로 CutOut 플래그 설정
+    plist[0].CutOut_Flag = true;
+
+    // 3) 최종 ACC/AEB 타겟 선정: 잘라내기 됐으니 둘 다 -1
+    ACC_Target_t acc;  AEB_Target_t aeb;
+    select_targets_for_acc_aeb(&egoData, plist, 1, &lsData, &acc, &aeb);
+    EXPECT_EQ(acc.ACC_Target_ID, -1);
+    EXPECT_EQ(aeb.AEB_Target_ID, -1);
 }
 
 // 25) TC_TGT_ST_RA_25: 셀 번호 보정 최소 보정 검증
@@ -1064,10 +1182,17 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_25)
 // 26) TC_TGT_ST_RA_26: 셀 번호 보정 최대 보정 검증
 TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_26)
 {
-    objList[0].Distance=120.0f; 
-    objList[0].Position_Y=2.7f; // => +1
-    int outCount=callSelectTarget(objList,1,&egoData,&lsData,filteredList,MAX_FILTERED);
-    EXPECT_EQ(outCount,1);
+    objList[0].Object_ID   = 26;
+    objList[0].Object_Type = OBJTYPE_CAR;
+    objList[0].Distance    = 50.0f;
+    objList[0].Position_X  = 50.0f;
+    objList[0].Position_Y  = 2.7f;
+    objList[0].Velocity_X  =  0.0f;
+
+    int outCount = callSelectTarget(
+        objList, 1, &egoData, &lsData, filteredList, MAX_FILTERED);
+
+    EXPECT_EQ(outCount, 0);
 }
 
 // 27) TC_TGT_ST_RA_27: 차량 타입별 필터링 검증

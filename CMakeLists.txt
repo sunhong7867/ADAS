@@ -27,9 +27,9 @@ add_library(adas
 
 # 테스트 실행 파일 추가
 add_executable(adas_unit_tests 
-	#test.cpp
+	test.cpp
     #ego_vehicle_estimation_EQ_test.cpp
-	ego_vehicle_estimation_BV_test.cpp
+	#ego_vehicle_estimation_BV_test.cpp
 	#ego_vehicle_estimation_RA_test.cpp
 	
 	#lane_selection_test.cpp

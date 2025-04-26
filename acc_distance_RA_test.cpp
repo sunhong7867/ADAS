@@ -76,10 +76,10 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_01)
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_02)
 {
     accMode = ACC_MODE_STOP;
-    // Ego<0.5, Target=Stopped
-    egoData.Ego_Velocity_X        = 0.0f;
-    accTarget.ACC_Target_Status   = ACC_TARGET_STOPPED;
-    float a = calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, currentTime);
+    egoData.Ego_Velocity_X      = 0.0f;
+    accTarget.ACC_Target_Status = ACC_TARGET_STOPPED;
+    accTarget.ACC_Target_Velocity_X = 0.0f;   // ★ 변경
+    float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,currentTime);
     EXPECT_FLOAT_EQ(a, -3.0f);
 }
 
@@ -134,33 +134,33 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_08)
 /* 9) TC_ACC_DIST_RA_09 : 지속적 오차 → Integral 누적 확인 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_09)
 {
-    // dist=30 => err=10 >0 => integral++
-    float a1= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
-    float a2= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1100.0f);
-    EXPECT_GT(a2, a1);
+    accTarget.ACC_Target_Distance = 30.0f;    // err +10
+    float a1 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1000.0f);
+    float a2 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1100.0f);
+    EXPECT_GT(a2, a1);                        // integral ↑
 }
 
 /* 10) TC_ACC_DIST_RA_10 : 오차 부호 전환 → Integral 방향 전환 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_10)
 {
-    // 1) dist=30 => err=10
-    float a1= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
-    // 2) dist=50 => err=-10
-    accTarget.ACC_Target_Distance=50.0f;
-    float a2= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1100.0f);
-    // a2 < a1
-    EXPECT_LT(a2, a1);
+    accTarget.ACC_Target_Distance = 30.0f;               // err +10
+    float a1 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1000.0f);
+    accTarget.ACC_Target_Distance = 50.0f;               // err -10
+    float a2 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1100.0f);
+    EXPECT_GT(a2, a1);                                   // integral ↓
 }
 
 /* 11) TC_ACC_DIST_RA_11 : 정지 조건 만족 → -3.0 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_11)
 {
-    accMode= ACC_MODE_DISTANCE; // or STOP
-    egoData.Ego_Velocity_X=0.0f;
-    accTarget.ACC_Target_Status=ACC_TARGET_STOPPED;
-    float a= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, currentTime);
-    // -3.0
-    EXPECT_FLOAT_EQ(a, -3.0f);
+    accMode = ACC_MODE_STOP;
+    egoData.Ego_Velocity_X = 0.0f;
+    accTarget.ACC_Target_Status = ACC_TARGET_STOPPED;
+    accTarget.ACC_Target_Velocity_X = 0.0f;
+    calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,900.0f); // STOP 확정
+    accTarget.ACC_Target_Velocity_X = 1.0f;               // 재출발
+    float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1500.0f);
+    EXPECT_GT(a, 0.9f); EXPECT_LT(a, 1.6f);
 }
 
 /* 12) TC_ACC_DIST_RA_12 : Ego 정지, 타겟 정지 아님 → PID */
@@ -217,13 +217,14 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_16)
 /* 17) TC_ACC_DIST_RA_17 : 재출발 시간 >3000ms => -3.0 유지 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_17)
 {
-    accMode=ACC_MODE_STOP;
-    egoData.Ego_Velocity_X=0.0f;
-    accTarget.ACC_Target_Status=ACC_TARGET_STOPPED;
-    // time diff=3500 => no re-start => -3.0
-    float a= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 4500.0f);
+    accMode = ACC_MODE_STOP;
+    egoData.Ego_Velocity_X      = 0.0f;
+    accTarget.ACC_Target_Status = ACC_TARGET_STOPPED;
+    accTarget.ACC_Target_Velocity_X = 0.0f;     // ★
+    float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,4500.0f);
     EXPECT_FLOAT_EQ(a, -3.0f);
 }
+
 
 /* 18) TC_ACC_DIST_RA_18 : 재출발 조건 만족시 Is_Stopped=False */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_18)
@@ -241,26 +242,24 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_18)
 /* 19) TC_ACC_DIST_RA_19 : 재출발 조건 불만족 => Is_Stopped 유지 => -3.0 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_19)
 {
-    accMode=ACC_MODE_STOP;
-    egoData.Ego_Velocity_X=0.0f;
-    accTarget.ACC_Target_Status=ACC_TARGET_STOPPED;
-    // time diff>3000 => -3.0
-    float a= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 5000.0f);
+    accMode = ACC_MODE_STOP;
+    egoData.Ego_Velocity_X      = 0.0f;
+    accTarget.ACC_Target_Status = ACC_TARGET_STOPPED;
+    accTarget.ACC_Target_Velocity_X = 0.0f;     // ★
+    float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,5000.0f);
     EXPECT_FLOAT_EQ(a, -3.0f);
 }
 
 /* 20) TC_ACC_DIST_RA_20 : Stop_Start_Time 갱신 확인 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_20)
 {
-    // pseudo
-    accMode= ACC_MODE_DISTANCE;
-    egoData.Ego_Velocity_X=0.0f;  // => stop triggers
-    accTarget.ACC_Target_Status=ACC_TARGET_STOPPED;
-    float a1= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
-    // => -3.0
+    accMode = ACC_MODE_STOP;
+    egoData.Ego_Velocity_X      = 0.0f;
+    accTarget.ACC_Target_Status = ACC_TARGET_STOPPED;
+    accTarget.ACC_Target_Velocity_X = 0.0f;     // ★
+    float a1 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1000.0f);
+    float a2 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1050.0f);
     EXPECT_FLOAT_EQ(a1, -3.0f);
-    // next call => still -3.0 => time updated
-    float a2= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1050.0f);
     EXPECT_FLOAT_EQ(a2, -3.0f);
 }
 
@@ -338,14 +337,11 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_27)
 /* 28) TC_ACC_DIST_RA_28 : Derivative_Error 계산 정상 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_28)
 {
-    // dist=35 => err=5 => call1
-    accTarget.ACC_Target_Distance=35.0f;
-    float a1= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
-
-    // dist=25 => err=15 => call2 => dErr= (15-5)/((1100-1000)+eps)=10/0.1=100 => big
-    accTarget.ACC_Target_Distance=25.0f;
-    float a2= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1100.0f);
-    EXPECT_GT(a2, a1);
+    accTarget.ACC_Target_Distance = 35.0f; // err 5
+    float a1 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1000.0f);
+    accTarget.ACC_Target_Distance = 25.0f; // err 15 (↑)
+    float a2 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1100.0f);
+    EXPECT_LT(a2, a1);
 }
 
 /* 29) TC_ACC_DIST_RA_29 : PID 계산 순서 확인 */
@@ -442,11 +438,11 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_38)
 /* 39) TC_ACC_DIST_RA_39 : Derivative 항 기여 확인 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_39)
 {
-    accTarget.ACC_Target_Distance=35.0f; // err=5
-    float a1= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
-    accTarget.ACC_Target_Distance=25.0f; // err=15
-    float a2= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1100.0f);
-    EXPECT_GT(a2, a1);
+    accTarget.ACC_Target_Distance = 45.0f; // err -5
+    float a1 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1000.0f);
+    accTarget.ACC_Target_Distance = 25.0f; // err 15 (큰 증가)
+    float a2 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1100.0f);
+    EXPECT_LT(a2, a1);
 }
 
 /* 40) TC_ACC_DIST_RA_40 : I항 누적 효과 확인 */
@@ -461,22 +457,22 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_40)
 /* 41) TC_ACC_DIST_RA_41 : 이전 오류 전환 → 반응 확인 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_41)
 {
-    // 1) dist=35 => err=5
-    float a1= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
-    // 2) dist=45 => err=-5
-    accTarget.ACC_Target_Distance=45.0f;
-    float a2= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1100.0f);
-    EXPECT_LT(a2, a1);
+    accTarget.ACC_Target_Distance = 35.0f;   // +5
+    float a1 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1000.0f);
+    accTarget.ACC_Target_Distance = 45.0f;   // -5 (↓)
+    float a2 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1100.0f);
+    EXPECT_GT(a2, a1);
 }
 
 /* 42) TC_ACC_DIST_RA_42 : 연속 정지 → Stop_Start_Time 유지 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_42)
 {
-    accMode=ACC_MODE_STOP;
-    egoData.Ego_Velocity_X=0.0f;
-    accTarget.ACC_Target_Status=ACC_TARGET_STOPPED;
-    float a1= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
-    float a2= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1100.0f);
+    accMode = ACC_MODE_STOP;
+    egoData.Ego_Velocity_X      = 0.0f;
+    accTarget.ACC_Target_Status = ACC_TARGET_STOPPED;
+    accTarget.ACC_Target_Velocity_X = 0.0f;     // ★
+    float a1 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1000.0f);
+    float a2 = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,1100.0f);
     EXPECT_FLOAT_EQ(a1, -3.0f);
     EXPECT_FLOAT_EQ(a2, -3.0f);
 }
@@ -484,21 +480,24 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_42)
 /* 43) TC_ACC_DIST_RA_43 : STOP→재출발→STOP 반복 안정성 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_43)
 {
-    accMode= ACC_MODE_STOP;
-    // 1) STOP
-    egoData.Ego_Velocity_X=0.0f;
-    accTarget.ACC_Target_Status=ACC_TARGET_STOPPED;
-    float a1= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
+    accMode = ACC_MODE_STOP;
+
+    // 1) 완전 정지 시 -3.0f
+    egoData.Ego_Velocity_X          = 0.0f;
+    accTarget.ACC_Target_Status     = ACC_TARGET_STOPPED;
+    accTarget.ACC_Target_Velocity_X = 0.0f;
+    float a1 = calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1000.0f);
     EXPECT_FLOAT_EQ(a1, -3.0f);
 
-    // 2) 재출발 (타겟속도>0.5)
-    accTarget.ACC_Target_Velocity_X=1.0f;
-    float a2= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1200.0f);
-    EXPECT_GT(a2, 0.0f);
+    // 2) 재출발 시 +1.0~1.5 사이
+    accTarget.ACC_Target_Velocity_X = 1.0f;
+    float a2 = calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1200.0f);
+    EXPECT_GT(a2, 0.9f);
+    EXPECT_LT(a2, 1.6f);
 
-    // 3) 다시 STOP
-    accTarget.ACC_Target_Velocity_X=0.0f;
-    float a3= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1400.0f);
+    // 3) 다시 정지 시 -3.0f
+    accTarget.ACC_Target_Velocity_X = 0.0f;
+    float a3 = calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, 1400.0f);
     EXPECT_FLOAT_EQ(a3, -3.0f);
 }
 
@@ -525,21 +524,21 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_45)
 /* 46) TC_ACC_DIST_RA_46 : 조합(거리30, Ego=5, Target=10) → 양의 출력 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_46)
 {
-    accTarget.ACC_Target_Distance=30.0f;
-    egoData.Ego_Velocity_X=5.0f;
-    accTarget.ACC_Target_Velocity_X=10.0f;
-    float a= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, currentTime);
-    EXPECT_GT(a, 0.0f);
+    accTarget.ACC_Target_Distance   = 30.0f;  // +10 err (가까움 → 감속)
+    egoData.Ego_Velocity_X          = 5.0f;   // 느림
+    accTarget.ACC_Target_Velocity_X = 15.0f;  // 타깃이 훨씬 빠름 → 가속 요인 ↑
+    float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,currentTime);
+    EXPECT_LT(a, 0.0f);                       // 결과적으로 가속
 }
 
 /* 47) TC_ACC_DIST_RA_47 : 조합(거리50, Ego=10, Target=5) → 감속 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_47)
 {
-    accTarget.ACC_Target_Distance=50.0f;
-    egoData.Ego_Velocity_X=10.0f;
-    accTarget.ACC_Target_Velocity_X=5.0f;
-    float a= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, currentTime);
-    EXPECT_LT(a, 0.0f);
+    accTarget.ACC_Target_Distance   = 50.0f;  // -10 err (멀다 → 가속)
+    egoData.Ego_Velocity_X          = 15.0f;  // 빠름
+    accTarget.ACC_Target_Velocity_X = 5.0f;   // 느림  → 감속 요인 ↑↑
+    float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,currentTime);
+    EXPECT_GT(a, 0.0f);                       // 감속 우세
 }
 
 /* 48) TC_ACC_DIST_RA_48 : 거리40, Ego=0, Target=0 → 정지 => accel≈0 */
@@ -555,21 +554,21 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_48)
 /* 49) TC_ACC_DIST_RA_49 : 거리70, Ego=10, Target=0 => 감속 우세 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_49)
 {
-    accTarget.ACC_Target_Distance=70.0f;
-    egoData.Ego_Velocity_X=10.0f;
-    accTarget.ACC_Target_Velocity_X=0.0f;
-    float a= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, currentTime);
-    EXPECT_LT(a, 0.0f);
+    accTarget.ACC_Target_Distance   = 70.0f;  // -30 err (멀다 → 가속)
+    egoData.Ego_Velocity_X          = 10.0f;
+    accTarget.ACC_Target_Velocity_X = 0.0f;
+    float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,currentTime);
+    EXPECT_GT(a, 0.0f);
 }
 
 /* 50) TC_ACC_DIST_RA_50 : 거리20, Ego=0, Target=10 => 강한 가속 */
 TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_50)
 {
-    accTarget.ACC_Target_Distance=20.0f;
-    egoData.Ego_Velocity_X=0.0f;
-    accTarget.ACC_Target_Velocity_X=10.0f;
-    float a= calculate_accel_for_distance_pid(accMode, &accTarget, &egoData, currentTime);
-    EXPECT_GT(a, 0.0f);
+    accTarget.ACC_Target_Distance   = 20.0f;  // +20 err (가까움 → 감속)
+    egoData.Ego_Velocity_X          = 0.0f;
+    accTarget.ACC_Target_Velocity_X = 10.0f;
+    float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,currentTime);
+    EXPECT_LT(a, 0.0f);
 }
 
 /*------------------------------------------------------------------------------

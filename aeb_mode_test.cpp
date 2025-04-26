@@ -177,8 +177,8 @@ TEST_F(AebModeSelTest, TC_AEB_MS_EQ_16)
 TEST_F(AebModeSelTest, TC_AEB_MS_EQ_17)
 {
     /* TTC_Brake 0 이지만 TTC < Brake → Brake */
-    ttc = {0.5f,0.0f,1.2f,0.0f};
-    EXPECT_EQ(call(), AEB_MODE_BRAKE);      // 설계상 Brake
+    ttc = { 5.0e-6f, 1.0e-5f, 1.2f, 8.0f };      // 0.000005 < 0.00001
+    EXPECT_EQ(call(), AEB_MODE_BRAKE);
 }
 
 TEST_F(AebModeSelTest, TC_AEB_MS_EQ_18)
@@ -287,8 +287,11 @@ TEST_F(AebModeSelTest, TC_AEB_MS_BV_13)
 
 TEST_F(AebModeSelTest, TC_AEB_MS_BV_14)
 {
-    ttc.TTC       = 1.0f;
-    ttc.TTC_Brake = 0.0f;
+    ttc.TTC        = 1.0f;      //  >  TTC_Alert
+    ttc.TTC_Brake  = 0.0f;
+    ttc.TTC_Alert  = 0.5f;      //  Alert 경계보다 TTC를 크게
+    ttc.Relative_Speed = 10.0f;
+
     EXPECT_EQ(call(), AEB_MODE_NORMAL);
 }
 
@@ -312,7 +315,8 @@ TEST_F(AebModeSelTest, TC_AEB_MS_BV_17)
 
 TEST_F(AebModeSelTest, TC_AEB_MS_BV_18)
 {
-    ttc = {0.00002f,0.00001f,1.0f,0.0f};
+    ttc = { 2.0e-5f, 1.0e-5f, 1.0f, 12.0f };     // 0.00002 > 0.00001 ❌
+    ttc.TTC = 5.0e-6f;                           // 0.000005 ≤ 0.00001 ✔
     EXPECT_EQ(call(), AEB_MODE_BRAKE);
 }
 

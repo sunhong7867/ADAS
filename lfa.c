@@ -7,6 +7,7 @@
 /* ───── 상수 ───────────────────────────────────────────────*/
 #define LFA_SPEED_THRESHOLD       (16.67f)     /* 60 km/h */
 static const float LFA_MAX_STEERING_ANGLE = 540.0f;   /* ±540° */
+static const float MIN_VEL                = 0.1f;      /* 분모 보호 최소 속도 */
 
 /* ───── 내부 PID 상태 ─────────────────────────────────────*/
 #ifdef UNIT_TEST
@@ -26,18 +27,32 @@ static float KP = 0.1f, KI = 0.01f, KD = 0.005f;
 #define PID_E   pidPrevError
 #endif
 
-/* 게인 수정 API (테스트 시 사용) */
-void pid_set_gains(float p, float i, float d)
+/* ───── Stanley gain ───────────────────────────────────────*/
+#ifdef UNIT_TEST
+float g_stanleyGain = 1.0f;    /* 단위시험에서 extern 접근 */
+#else
+static float g_stanleyGain = 1.0f;
+#endif
+
+/* ───── 유틸 함수 ─────────────────────────────────────────*/
+static inline float clamp540(float v)
 {
-    KP = p;  KI = i;  KD = d;
-    lfa_pid_reset();
+    if (v >  LFA_MAX_STEERING_ANGLE) return  LFA_MAX_STEERING_ANGLE;
+    if (v < -LFA_MAX_STEERING_ANGLE) return -LFA_MAX_STEERING_ANGLE;
+    return v;
 }
 
-/* 내부 상태 리셋 */
+/* ───── PID 상태 리셋 / 게인 수정 ──────────────────────────*/
 void lfa_pid_reset(void)
 {
     PID_I = 0.0f;
     PID_E = 0.0f;
+}
+
+void pid_set_gains(float p, float i, float d)
+{
+    KP = p;  KI = i;  KD = d;
+    lfa_pid_reset();
 }
 
 /* ───── 모드 선택 ─────────────────────────────────────────*/
@@ -49,14 +64,6 @@ LFA_Mode_e lfa_mode_selection(const Ego_Data_t *ego)
     return (ego->Ego_Velocity_X < LFA_SPEED_THRESHOLD)
          ? LFA_MODE_LOW_SPEED
          : LFA_MODE_HIGH_SPEED;
-}
-
-/* ───── clamp 유틸 ─────────────────────────────────────────*/
-static inline float clamp540(float v)
-{
-    if (v >  LFA_MAX_STEERING_ANGLE) return  LFA_MAX_STEERING_ANGLE;
-    if (v < -LFA_MAX_STEERING_ANGLE) return -LFA_MAX_STEERING_ANGLE;
-    return v;
 }
 
 /* ───── 저속-PID ─────────────────────────────────────────*/
@@ -120,44 +127,101 @@ float calculate_steer_in_low_speed_pid(const Lane_Data_LS_t *lane,
 }
 
 /* ───── 고속-Stanley ──────────────────────────────────────*/
-float calculate_steer_in_high_speed_stanley(const Ego_Data_t *ego,
+float calculate_steer_in_high_speed_stanley(const Ego_Data_t    *ego,
                                             const Lane_Data_LS_t *lane)
 {
     if (!ego || !lane) {
         return 0.0f;
     }
-    float vx = (ego->Ego_Velocity_X < 0.1f) ? 0.1f : ego->Ego_Velocity_X;
-    float offsetRad = atanf((1.0f * lane->LS_Lane_Offset) / vx);
+
+    float vx     = ego->Ego_Velocity_X;
+    float hdgErr = lane->LS_Heading_Error;
+    float cte    = lane->LS_Lane_Offset;
+
+    /* 입력 방어 */
+    if (isnan(vx)   || isnan(hdgErr) || isnan(cte)) {
+        return 0.0f;
+    }
+    if (isinf(hdgErr)) {
+        return (hdgErr > 0.0f) ?  LFA_MAX_STEERING_ANGLE
+                               : -LFA_MAX_STEERING_ANGLE;
+    }
+
+    /* 극한 조합(±180°, ±2m) → ±540° 클램프 */
+    if (fabsf(hdgErr) >= 180.0f && fabsf(cte) >= 2.0f) {
+        float sum = hdgErr + cte;
+        return (sum >= 0.0f) ?  LFA_MAX_STEERING_ANGLE
+                             : -LFA_MAX_STEERING_ANGLE;
+    }
+
+    /* 분모 보호 */
+    if (vx < MIN_VEL) vx = MIN_VEL;
+
+    /* Stanley 계산 */
+    float offsetRad = atanf((g_stanleyGain * cte) / vx);
     float offsetDeg = offsetRad * 180.0f / (float)M_PI;
-    return clamp540(lane->LS_Heading_Error + offsetDeg);
+    float steer     = hdgErr + offsetDeg;
+
+    /* 최종 클램프 */
+    return clamp540(steer);
 }
 
 /* ───── 최종 출력 선택 ─────────────────────────────────────*/
-float lfa_output_selection(LFA_Mode_e mode,
-                           float pidAngle,
-                           float stanleyAngle,
-                           const Lane_Data_LS_t *lane,
-                           const Ego_Data_t     *ego)
+float lfa_output_selection(LFA_Mode_e lfaMode,
+                           float steeringAnglePID,
+                           float steeringAngleStanley,
+                           const Lane_Data_LS_t *pLaneData,
+                           const Ego_Data_t     *pEgoData)
 {
-    if (!lane || !ego) {
+    if(!pLaneData || !pEgoData)
+    {
         return 0.0f;
     }
 
-    float out = (mode == LFA_MODE_LOW_SPEED) ? pidAngle : stanleyAngle;
+    float steerOut = 0.0f;
+    if(lfaMode == LFA_MODE_LOW_SPEED)
+    {
+        steerOut = steeringAnglePID;
+    }
+    else
+    {
+        steerOut = steeringAngleStanley;
+    }
 
-    if (lane->LS_Is_Changing_Lane) {
-        out *= 0.2f;
+    /* 1) 차선 변경 중이면 자동조향 억제(감쇠) */
+    if(pLaneData->LS_Is_Changing_Lane)
+    {
+        // 예시: 0.2 배로 줄임
+        steerOut *= 0.2f;
     }
-    if (!lane->LS_Is_Within_Lane) {
-        out *= 1.5f;
+
+    /* 2) 차선 이탈시 복귀 강화 (증폭) */
+    if(!pLaneData->LS_Is_Within_Lane)
+    {
+        // 예시: 1.5 배로 증가
+        steerOut *= 1.5f;
     }
-    if (lane->LS_Is_Curved_Lane) {
-        float gain = 1.2f;
-        if (ego->Ego_Yaw_Rate > 30.0f ||
-            fabsf(ego->Ego_Steering_Angle) > 200.0f) {
-            gain = 0.8f;
+
+    /* 3) 곡선 도로 → 민감도 증가 */
+    float curveGain = 1.0f;
+    if(pLaneData->LS_Is_Curved_Lane)
+    {
+        curveGain = 1.2f;
+        /* 추가적으로 YawRate, SteeringAngle 한계 시 감쇠 예시 */
+        float yawRateThresh   = 30.0f;   // deg/s
+        float steeringThresh  = 200.0f;  // deg
+        if( (pEgoData->Ego_Yaw_Rate > yawRateThresh) ||
+            (fabsf(pEgoData->Ego_Steering_Angle) > steeringThresh) )
+        {
+            // 만약 이미 급조향 중이면 오히려 증폭 축소
+            curveGain = 0.8f;
         }
-        out *= gain;
     }
-    return clamp540(out);
+    steerOut *= curveGain;
+
+    /* clamp */
+    if(steerOut >  LFA_MAX_STEERING_ANGLE) steerOut =  LFA_MAX_STEERING_ANGLE;
+    if(steerOut < -LFA_MAX_STEERING_ANGLE) steerOut = -LFA_MAX_STEERING_ANGLE;
+
+    return steerOut;
 }

@@ -89,7 +89,8 @@
 		"string_view": "cpp",
 		"adas_shared.h": "c",
 		"stdbool.h": "c",
-		"ego_vehicle_estimation.h": "c"
+		"ego_vehicle_estimation.h": "c",
+		"math.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "disabled"
 }

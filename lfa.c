@@ -210,8 +210,8 @@ float lfa_output_selection(LFA_Mode_e lfaMode,
         /* 추가적으로 YawRate, SteeringAngle 한계 시 감쇠 예시 */
         float yawRateThresh   = 30.0f;   // deg/s
         float steeringThresh  = 200.0f;  // deg
-        if( (pEgoData->Ego_Yaw_Rate > yawRateThresh) ||
-            (fabsf(pEgoData->Ego_Steering_Angle) > steeringThresh) )
+        if( (pEgoData->Ego_Yaw_Rate >= yawRateThresh) ||
+            (fabsf(pEgoData->Ego_Steering_Angle) >= steeringThresh) )
         {
             // 만약 이미 급조향 중이면 오히려 증폭 축소
             curveGain = 0.8f;

@@ -865,11 +865,46 @@ TEST_F(SelectTargetsForAccAebTest, TC_TGT_SA_RA_20)
     EXPECT_EQ(aebTarget.AEB_Target_ID,-1);
 }
 
-//------------------------------------------------------------------------------
-// main() for test
-//------------------------------------------------------------------------------
-int main(int argc, char** argv)
+
+
+//==============================================================================
+TEST_F(SelectTargetsForAccAebTest, TC_TGT_SA_EQ_21_InvalidInput_ReturnDefault)
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    callSelectTargets(
+        nullptr,  // pEgoData NULL
+        predList, 1, &lsData, &accTarget, &aebTarget);
+
+    EXPECT_EQ(accTarget.ACC_Target_ID, -1);
+    EXPECT_EQ(aebTarget.AEB_Target_ID, -1);
+}
+
+TEST_F(SelectTargetsForAccAebTest, TC_TGT_SA_CutOutExcluded_ACC)
+{
+    predList[0].Predicted_Object_ID = 901;
+    predList[0].Predicted_Object_Type = OBJTYPE_CAR;
+    predList[0].Predicted_Object_Status = OBJSTAT_MOVING;
+    predList[0].Predicted_Position_X = 50.0f;
+    predList[0].Predicted_Position_Y = 0.0f; // 정면
+    predList[0].CutOut_Flag = true;           // CutOut!
+
+    callSelectTargets(&egoData, predList, 1, &lsData, &accTarget, &aebTarget);
+
+    EXPECT_EQ(accTarget.ACC_Target_ID, -1);
+    EXPECT_EQ(aebTarget.AEB_Target_ID, -1);
+}
+
+TEST_F(SelectTargetsForAccAebTest, TC_TGT_SA_CutOutExcluded_CutinCase)
+{
+    predList[0].Predicted_Object_ID = 902;
+    predList[0].Predicted_Object_Type = OBJTYPE_CAR;
+    predList[0].Predicted_Object_Status = OBJSTAT_MOVING;
+    predList[0].Predicted_Position_X = 30.0f;
+    predList[0].Predicted_Position_Y = 2.0f;
+    predList[0].CutIn_Flag = true;
+    predList[0].CutOut_Flag = true; // 둘 다 true지만
+
+    callSelectTargets(&egoData, predList, 1, &lsData, &accTarget, &aebTarget);
+
+    EXPECT_EQ(accTarget.ACC_Target_ID, -1);
+    EXPECT_EQ(aebTarget.AEB_Target_ID, -1);
 }

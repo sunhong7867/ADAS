@@ -1243,11 +1243,3 @@ TEST_F(SelectTargetFromObjectListTest, TC_TGT_ST_RA_30)
     EXPECT_EQ(filteredList[1].Filtered_Object_Status, OBJSTAT_ONCOMING);
 }
 
-//------------------------------------------------------------------------------
-// main() for test
-//------------------------------------------------------------------------------
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

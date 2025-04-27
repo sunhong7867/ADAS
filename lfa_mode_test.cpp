@@ -195,11 +195,3 @@ TEST_F(LfaModeTest, TC_LFA_MODE_RA_10)
     EXPECT_EQ(call(20.0f), LFA_MODE_HIGH_SPEED);
 }
 
-/*******************************************************************
- * main()
- ******************************************************************/
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

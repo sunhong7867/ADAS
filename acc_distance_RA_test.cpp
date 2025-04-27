@@ -570,12 +570,3 @@ TEST_F(AccDistancePidRATest, TC_ACC_DIST_RA_50)
     float a = calculate_accel_for_distance_pid(accMode,&accTarget,&egoData,currentTime);
     EXPECT_LT(a, 0.0f);
 }
-
-/*------------------------------------------------------------------------------
- * main()
- *----------------------------------------------------------------------------*/
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

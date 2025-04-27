@@ -41,16 +41,9 @@ protected:
 
     void SetUp() override
     {
-        // PID 내부 상태부터 초기화
-        lfa_pid_reset();
-
-        // 테스트 전용 전역 변수도 초기화
 #ifdef UNIT_TEST
-        g_pidIntegral   = 0.0f;
-        g_pidPrevError  = 0.0f;
+        pid_set_gains(0.1f, 0.01f, 0.005f);
 #endif
-
-        // 기본 lane 데이터 세팅
         lane = makeLaneOut(0.0f, 0.0f);
     }
 
@@ -532,11 +525,33 @@ TEST_F(LfaPidTest, TC_LFA_PID_RA_20)
     EXPECT_NEAR(call(1.0f), 0.0f, TOL);
 }
 
-/*******************************************************************
- *  main()
- ******************************************************************/
-int main(int argc, char **argv)
+
+//------------------------------------------------------------------------------
+// 추가: PID 적분 과포화 음수 분기 테스트
+//------------------------------------------------------------------------------
+TEST_F(LfaPidTest, TestPidIntegralSaturateResetNegative)
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+#ifdef UNIT_TEST
+    // 의도적으로 매우 큰 음수 PID_I 설정
+    g_pidIntegral = -1e6f;
+#endif
+    // 정상 오차값을 넣어 dt=1.0 구간을 타도
+    lane = makeLaneOut(1.0f, 1.0f);
+    float steer = call(1.0f);
+    // fabs(steer) == 540 이고, 음수 분기이므로 steer ≈ -540
+    EXPECT_NEAR(steer, -LFA_MAX_STEERING_ANGLE, 1e-2f);
+}
+
+TEST_F(LfaPidTest, TestInfErrorDirectly)
+{
+    lane = makeLaneOut(1e38f, 1e38f);  // 둘 다 float 최대값 근처
+    float steer = call(1.0f);  
+    EXPECT_NEAR(steer, LFA_MAX_STEERING_ANGLE, 1e-2f); // +INF → +540 기대
+}
+
+TEST_F(LfaPidTest, TestNegInfErrorDirectly)
+{
+    lane = makeLaneOut(-1e38f, -1e38f);
+    float steer = call(1.0f);  
+    EXPECT_NEAR(steer, -LFA_MAX_STEERING_ANGLE, 1e-2f); // -INF → -540 기대
 }

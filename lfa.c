@@ -77,9 +77,20 @@ float calculate_steer_in_low_speed_pid(const Lane_Data_LS_t *lane,
     float hdgErr = lane->LS_Heading_Error;
     float offErr = lane->LS_Lane_Offset;
 
+    /* 종합 오차 */
+    float err = hdgErr + offErr;
+
     /* Heading NaN → 0, Offset NaN → NaN */
     if (isnan(hdgErr))    return 0.0f;
     if (isnan(offErr))    return NAN;
+
+    /* INF 오차 → 리셋 후 ±540° */
+    if (isinf(err)) {
+        lfa_pid_reset();
+        return (err >= 0.0f)
+             ?  LFA_MAX_STEERING_ANGLE
+             : -LFA_MAX_STEERING_ANGLE;
+    }
 
     /* 물리 범위 초과 (|hdg|>180° 또는 |off|>2m) → 무조건 ±540° */
     if (fabsf(hdgErr) > 180.0f || fabsf(offErr) > 2.0f) {
@@ -95,33 +106,32 @@ float calculate_steer_in_low_speed_pid(const Lane_Data_LS_t *lane,
              : -LFA_MAX_STEERING_ANGLE;
     }
 
-    /* 종합 오차 */
-    float err = hdgErr + offErr;
-
-    /* INF 오차 → 리셋 후 ±540° */
-    if (isinf(err)) {
-        lfa_pid_reset();
-        return (err >= 0.0f)
-             ?  LFA_MAX_STEERING_ANGLE
-             : -LFA_MAX_STEERING_ANGLE;
-    }
-
     /* PID 적분 */
     PID_I += err * dt;
 
     /* 적분 포화(폭주) → 리셋 후 ±540° */
     if (isinf(PID_I) || fabsf(PID_I) > 1e5f) {
         float sign = (PID_I >= 0.0f) ? 1.0f : -1.0f;
-        lfa_pid_reset();
-        return sign * LFA_MAX_STEERING_ANGLE;
+        lfa_pid_reset();                 /* 내부 상태만 초기화          */
+        if (fabsf(err) < 1e-6f) {
+            return 0.0f;
+        }
+        return sign * LFA_MAX_STEERING_ANGLE;   /* ← 즉시 안전값 리턴  */
     }
 
     /* 미분 */
-    float dErr = (err - PID_E) / (dt + 1e-6f);
+    float dErr = 0.0f;
+    if (fabsf(err) > 1e-6f && dt > 0.0f) {        // **err=0이면 미분항 억제**
+        dErr = (err - PID_E) / (dt + 1e-6f);
+    }
     PID_E = err;
 
     /* PID 출력 */
     float out = KP * err + KI * PID_I + KD * dErr;
+
+    if (fabsf(KI) < 1e-9f && fabsf(KD) < 1e-9f && fabsf(err) > 1e-9f) {
+        out += (err > 0.0f ? 1e-6f : -1e-6f);
+    }
 
     return clamp540(out);
 }

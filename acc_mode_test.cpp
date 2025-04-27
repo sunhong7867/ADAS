@@ -627,12 +627,3 @@ TEST_F(AccModeSelectionTest, TC_ACC_MS_RA_20)
     ACC_Mode_e mode = acc_mode_selection(&accTargetData, &egoData, &laneData);
     EXPECT_EQ(mode, ACC_MODE_SPEED);
 }
-
-/*------------------------------------------------------------------------------
- * main()
- *----------------------------------------------------------------------------*/
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

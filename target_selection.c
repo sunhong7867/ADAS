@@ -34,10 +34,11 @@ int select_target_from_object_list(const ObjectData_t *pObjList,
     int filteredIndex = 0;
 
     /* 곡선 차로 보정 계수 */
+    const float LATERAL_EPS   = 1e-3f;
     float Heading_Error_Coeff = 0.05f;
     float Adjusted_Lateral_Threshold = pLsData->LS_Lane_Width * 0.5f;
 
-    if (pLsData->LS_Is_Curved_Lane) {
+    if (pLsData->LS_Is_Curved_Lane && fabsf(pLsData->LS_Heading_Error) > 1.0f) {
         /* 곡선이면 차선 너비 + (fabs(Heading_Error) * 계수) */
         Adjusted_Lateral_Threshold += fabsf(pLsData->LS_Heading_Error) * Heading_Error_Coeff;
     }
@@ -56,8 +57,17 @@ int select_target_from_object_list(const ObjectData_t *pObjList,
 
         /* 2) 횡방향 필터링: Lateral Position = Obj.PositionY - LS_Lane_Offset */
         float Object_Lateral_Position = obj->Position_Y - pLsData->LS_Lane_Offset;
-        if (fabsf(Object_Lateral_Position) > Adjusted_Lateral_Threshold) {
-            continue;
+        float Lane_Center_Offset = fabsf(Object_Lateral_Position);
+
+        float quarterW = pLsData->LS_Lane_Width * 0.25f;
+        float threeQW  = pLsData->LS_Lane_Width * 0.75f;
+
+        if (Lane_Center_Offset > (Adjusted_Lateral_Threshold + LATERAL_EPS)) {
+            continue; /* 최종 한계 초과 시 제외 */
+        }
+        if (Lane_Center_Offset > (pLsData->LS_Lane_Width * 0.5f + LATERAL_EPS) &&
+            Lane_Center_Offset < (threeQW - LATERAL_EPS)) {
+            continue; /* 50% 초과 ~ 75% 미만이면 제외 */
         }
 
         /* 3) 상태 분류 */
@@ -113,16 +123,15 @@ int select_target_from_object_list(const ObjectData_t *pObjList,
         }
 
         /* 횡방향 위치 보정 offset => -1, 0, +1 */
-        float Lane_Center_Offset = fabsf(obj->Position_Y - pLsData->LS_Lane_Offset);
         int   Offset_Adjustment   = 0;
-
-        float quarterW = pLsData->LS_Lane_Width * 0.25f;
-        float threeQW  = pLsData->LS_Lane_Width * 0.75f;
-        if (Lane_Center_Offset < quarterW) {
+        if (Lane_Center_Offset <= quarterW) {
             Offset_Adjustment = -1;
         }
         else if (Lane_Center_Offset >= threeQW) {
             Offset_Adjustment = +1;
+        }
+        else {
+            Offset_Adjustment = 0;
         }
 
         int CellNumber = Base_CellNumber + Offset_Adjustment;
@@ -384,8 +393,6 @@ void select_targets_for_acc_aeb(const EgoData_t *pEgoData,
         /* 상황 (Cut-in/out/Normal etc.) */
         if (obj->CutIn_Flag) 
             pAccTarget->ACC_Target_Situation = TGT_SITU_CUTIN;
-        else if (obj->CutOut_Flag) 
-            pAccTarget->ACC_Target_Situation = TGT_SITU_CUTOUT;
         else if (pLsData->LS_Is_Curved_Lane) 
             pAccTarget->ACC_Target_Situation = TGT_SITU_CURVE; /* 예시 */
         else 
@@ -408,8 +415,6 @@ void select_targets_for_acc_aeb(const EgoData_t *pEgoData,
 
         if (obj->CutIn_Flag) 
             pAebTarget->AEB_Target_Situation = TGT_SITU_CUTIN;
-        else if (obj->CutOut_Flag) 
-            pAebTarget->AEB_Target_Situation = TGT_SITU_CUTOUT;
         else if (pLsData->LS_Is_Curved_Lane) 
             pAebTarget->AEB_Target_Situation = TGT_SITU_CURVE;
         else 

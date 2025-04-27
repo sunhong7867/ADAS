@@ -22,12 +22,13 @@ typedef struct {
     float Last_GPS_Timestamp;
 
     float Previous_Update_Time;
-
     float Prev_Accel_X;
     float Prev_Accel_Y;
     float Prev_Yaw_Rate;
     float Prev_GPS_Vel_X;
     float Prev_GPS_Vel_Y;
+
+    bool  gps_update_enabled;
 
     /* 칼만 필터 상태 [vx, vy, ax, ay, heading] 등 */
     float X[5];

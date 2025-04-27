@@ -1119,12 +1119,3 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_RA_50)
     // 10 → 10.2 에 대해 중간 정도로 스무딩
     EXPECT_NEAR(egoData.Ego_Velocity_X, 10.1f, 0.5f);
 }
-
-/*--------------------------------------------------
- * main()
- *------------------------------------------------*/
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

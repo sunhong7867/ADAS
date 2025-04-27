@@ -72,6 +72,7 @@ float lfa_output_selection(LFA_Mode_e lfaMode,
  * @brief 테스트용: PID 내부 상태 초기화
  */
 void lfa_pid_reset(void);
+void pid_set_gains(float kp, float ki, float kd);
 
 #ifdef __cplusplus
 }

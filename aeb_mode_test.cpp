@@ -467,12 +467,3 @@ TEST_F(AebModeSelTest, TC_AEB_MS_RA_20)
     ttc.TTC = 1.0f;
     EXPECT_EQ(call(), AEB_MODE_BRAKE);
 }
-
-/*******************************************************************
- * main()
- ******************************************************************/
-int main(int argc,char** argv)
-{
-    ::testing::InitGoogleTest(&argc,argv);
-    return RUN_ALL_TESTS();
-}

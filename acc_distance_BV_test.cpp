@@ -572,11 +572,3 @@ TEST_F(AccDistancePidBVTest, TC_ACC_DIST_BV_50)
     EXPECT_LT(a2, a1);                                           // 감속 더 큼
 }
 
-/*------------------------------------------------------------------------------
- * main()
- *----------------------------------------------------------------------------*/
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

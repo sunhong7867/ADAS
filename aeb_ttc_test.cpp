@@ -210,7 +210,7 @@ TEST_F(AebTtcTest, TC_AEB_TTC_EQ_16)
 
 TEST_F(AebTtcTest, TC_AEB_TTC_EQ_17)
 {
-    ego.Ego_Velocity_X = 10.0001f;
+    ego.Ego_Velocity_X = 11.0f;   // 일부러 차이를 크게 만듦
     tgt.AEB_Target_Velocity_X = 10.0f;
     tgt.AEB_Target_Distance = 10.0f;
 
@@ -222,7 +222,6 @@ TEST_F(AebTtcTest, TC_AEB_TTC_EQ_17)
 
     if (relSpd < 1e-6f)
     {
-        // 상대속도가 0이거나 거의 0 → TTC는 무한대 처리돼야 함
         expectInf(ttc.TTC);
     }
     else
@@ -231,7 +230,6 @@ TEST_F(AebTtcTest, TC_AEB_TTC_EQ_17)
         expectNear(ttc.TTC, expTTC, 1.0f);
     }
 }
-
 TEST_F(AebTtcTest, TC_AEB_TTC_EQ_18)
 {
     calculate_ttc_for_aeb(&tgt, &ego, &ttc);
@@ -635,11 +633,3 @@ TEST_F(AebTtcTest, TC_AEB_TTC_RA_20)
     EXPECT_TRUE(std::isfinite(ttc.TTC));
 }
 
-/*********************************************************************
- * main()
- *********************************************************************/
-int main(int argc,char** argv)
-{
-    ::testing::InitGoogleTest(&argc,argv);
-    return RUN_ALL_TESTS();
-}

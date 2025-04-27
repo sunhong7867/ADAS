@@ -372,11 +372,3 @@ TEST_F(StanleyTest, TC_LFA_STAN_RA_20) {
     EXPECT_NEAR(call(), expect, 1.0f);
 }
 
-/*******************************************************************
- *  main()
- ******************************************************************/
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

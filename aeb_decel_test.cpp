@@ -395,11 +395,3 @@ TEST_F(AebDecelTest, TC_AEB_DEC_RA_20)
     EXPECT_FLOAT_EQ(call(AEB_MODE_BRAKE), -2.0f);
 }
 
-/*******************************************************************
- * main()
- ******************************************************************/
-int main(int argc,char** argv)
-{
-    ::testing::InitGoogleTest(&argc,argv);
-    return RUN_ALL_TESTS();
-}

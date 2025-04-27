@@ -822,11 +822,34 @@ TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_RA_20)
     EXPECT_FALSE(predList[0].CutOut_Flag);
 }
 
-//------------------------------------------------------------------------------
-// main() for test
-//------------------------------------------------------------------------------
-int main(int argc, char** argv)
+// [SPECIAL] TC_TGT_FP_SPECIAL_01: 입력 pFilteredList=NULL → return 0
+TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_SPECIAL_01)
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    int outCount = predict_object_future_path(
+        nullptr, 1, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 0);
+}
+
+// [SPECIAL] TC_TGT_FP_SPECIAL_02: 입력 pLaneWp=NULL → return 0
+TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_SPECIAL_02)
+{
+    int outCount = predict_object_future_path(
+        filteredList, 1, nullptr, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 0);
+}
+
+// [SPECIAL] TC_TGT_FP_SPECIAL_03: filteredCount <= 0 → return 0
+TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_SPECIAL_03)
+{
+    int outCount = predict_object_future_path(
+        filteredList, 0, &laneWp, &lsData, predList, 50);
+    EXPECT_EQ(outCount, 0);
+}
+
+// [SPECIAL] TC_TGT_FP_SPECIAL_04: maxPredCount <= 0 → return 0
+TEST_F(PredictObjectFuturePathTest, TC_TGT_FP_SPECIAL_04)
+{
+    int outCount = predict_object_future_path(
+        filteredList, 1, &laneWp, &lsData, predList, 0);
+    EXPECT_EQ(outCount, 0);
 }

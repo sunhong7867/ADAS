@@ -1188,12 +1188,3 @@ TEST_F(EgoVehicleEstimationTest, TC_EGO_EQ_50)
 
     EXPECT_NEAR(egoData.Ego_Velocity_X, 10.1f, 0.5f);
 }
-
-/*--------------------------------------------------
- * main()
- *------------------------------------------------*/
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

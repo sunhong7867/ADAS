@@ -630,12 +630,3 @@ TEST_F(AccDistancePidTest, TC_ACC_DIST_EQ_50)
     // NaN/INF 아닌 finite 값이어야 한다
     EXPECT_TRUE(std::isfinite(a));
 }
-
-/*------------------------------------------------------------------------------
- * main() for test
- *----------------------------------------------------------------------------*/
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

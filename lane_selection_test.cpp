@@ -723,10 +723,14 @@ TEST_F(LaneSelectionTest, TC_LS_RA_20) {
         << "[TC_LS_RA_20 실패] 동일 입력 시 결과는 일관되어야 함.";
 }
 
-/******************************************************************************
- * main()
- ******************************************************************************/
-int main(int argc, char** argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+TEST_F(LaneSelectionTest, TC_LS_NULL_01)
+{
+    // pLaneData == NULL
+    EXPECT_EQ(LaneSelection(nullptr, &egoData, &lsOutput), -1);
+
+    // pEgoData == NULL
+    EXPECT_EQ(LaneSelection(&laneData, nullptr, &lsOutput), -1);
+
+    // pLaneOut == NULL
+    EXPECT_EQ(LaneSelection(&laneData, &egoData, nullptr), -1);
 }

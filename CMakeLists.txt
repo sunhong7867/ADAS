@@ -20,8 +20,8 @@ add_library(adas
 	#lane_selection.c
 	#target_selection.c
 	#acc.c
-	aeb.c
-	#lfa.c
+	#aeb.c
+	lfa.c
 	#arbitration.c
 )
 

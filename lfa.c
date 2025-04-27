@@ -18,7 +18,7 @@ static const float LFA_MAX_STEERING_ANGLE = 540.0f;
  * ---------------------------------------------------------------------------*/
 LFA_Mode_e lfa_mode_selection(const Ego_Data_t *pEgoData)
 {
-    if(!pEgoData)
+    if(!pEgoData || isnan(pEgoData->Ego_Velocity_X))
     {
         return LFA_MODE_LOW_SPEED; // fallback
     }

@@ -1,9 +1,9 @@
 [
 {
   "directory": "C:/Projects/GoogleTestProject/build",
-  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\aeb.c.obj -c C:\\Projects\\GoogleTestProject\\aeb.c",
-  "file": "C:/Projects/GoogleTestProject/aeb.c",
-  "output": "CMakeFiles/adas.dir/aeb.c.obj"
+  "command": "C:\\mingw64\\bin\\gcc.exe   -g -std=gnu99 -o CMakeFiles\\adas.dir\\lfa.c.obj -c C:\\Projects\\GoogleTestProject\\lfa.c",
+  "file": "C:/Projects/GoogleTestProject/lfa.c",
+  "output": "CMakeFiles/adas.dir/lfa.c.obj"
 },
 {
   "directory": "C:/Projects/GoogleTestProject/build",
